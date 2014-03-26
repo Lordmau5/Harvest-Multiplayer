@@ -1,6 +1,8 @@
 package com.github.lordmau5.harvest.server;
 
 //import com.github.lordmau5.harvest.server.config.Configuration;
+
+import com.github.lordmau5.harvest.server.config.Configuration;
 import com.github.lordmau5.harvest.server.connection.ConnectionHandler;
 import com.github.lordmau5.harvest.server.util.helper.PortUsage;
 
@@ -20,7 +22,7 @@ import java.util.Map;
 public class Server implements Runnable {
 
     private static ServerSocket serverSocket;
-    //public static Configuration config;  //FIXME
+    public static Configuration config;
     private static List<ConnectionHandler> conHandlers = new ArrayList<ConnectionHandler>();
     public static Map<Socket, String> players = new HashMap<Socket, String>();
 
@@ -55,8 +57,7 @@ public class Server implements Runnable {
 
     @Override
     public void run() {
-        //TODO: There is no configuration class in the repo so i disabled this to prevent compiler errors.
-        /*if(config == null)
+        if(config == null)
             config = new Configuration();
 
         if(!PortUsage.available(config.serverPort)) {
@@ -77,6 +78,6 @@ public class Server implements Runnable {
         }
         catch (IOException e) {
             e.printStackTrace();
-        }*/
+        }
     }
 }

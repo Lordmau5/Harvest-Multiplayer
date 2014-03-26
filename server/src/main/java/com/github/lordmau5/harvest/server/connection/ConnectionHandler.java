@@ -62,12 +62,11 @@ public class ConnectionHandler implements Runnable {
                 if(msg instanceof String[]) {
                     String[] str = (String[]) msg;
                     if(str[0].equals("username")) {
-                        //FIXME disabled because config didn't exist
-                        /*if(Server.players.size() >= Server.config.maxPlayers) {
+                        if(Server.players.size() >= Server.config.maxPlayers) {
                             sendToClient("SERVER - FULL");
                             closeCon();
                             return;
-                        }*/
+                        }
                         if(Server.players.containsValue(str[1])) {
                             sendToClient("NameInUse");
                             closeCon();
