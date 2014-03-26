@@ -1,0 +1,6 @@
+.git
+.idea
+config
+out
+server.config
+*.iml
