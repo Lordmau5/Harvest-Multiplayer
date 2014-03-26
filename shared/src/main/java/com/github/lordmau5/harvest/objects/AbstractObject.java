@@ -3,7 +3,6 @@ package com.github.lordmau5.harvest.objects;
 //import com.github.lordmau5.harvest.client.Client;
 
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 
 /**
  * Author: Lordmau5
@@ -16,6 +15,9 @@ public abstract class AbstractObject {
     private String textureName;
     private int textureHeight;
     private int textureWidth;
+
+    private int x;
+    private int y;
 
     public AbstractObject() {}
 
@@ -33,6 +35,15 @@ public abstract class AbstractObject {
             System.out.println(textureWidth + " : " + textureHeight);
         }
         catch (IOException e) {}*/
+    }
+
+    public void setPosition(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    public int[] getPosition() {
+        return new int[]{this.x, this.y};
     }
 
     public boolean canPassThrough() { return false; }

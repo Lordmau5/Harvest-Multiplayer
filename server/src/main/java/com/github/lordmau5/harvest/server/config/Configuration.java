@@ -1,4 +1,4 @@
-package server.config;
+package com.github.lordmau5.harvest.server.config;
 
 import java.io.*;
 

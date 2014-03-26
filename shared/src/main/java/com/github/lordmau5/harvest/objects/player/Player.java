@@ -9,8 +9,8 @@ import com.github.lordmau5.harvest.objects.AbstractObject;
  */
 public class Player extends AbstractObject {
 
-    public Player(String textureName, boolean animated) {
-        super(textureName, animated);
+    public Player() {
+        super("player", true);
     }
 
     @Override

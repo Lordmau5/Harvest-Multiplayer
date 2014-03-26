@@ -8,7 +8,9 @@ import com.github.lordmau5.harvest.objects.AbstractObject;
  * Time: 14:01
  */
 public class Grass extends AbstractObject {
-    public Grass(String textureName, boolean animated) {
-        super(textureName, animated);
+    public Grass() {
+        super("grass", false);
     }
+
+
 }
