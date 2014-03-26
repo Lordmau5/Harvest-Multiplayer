@@ -4,10 +4,10 @@ package com.github.lordmau5.harvest.server;
 
 import com.github.lordmau5.harvest.server.config.Configuration;
 import com.github.lordmau5.harvest.server.connection.ConnectionHandler;
+import com.github.lordmau5.harvest.server.network.NetworkServer;
 import com.github.lordmau5.harvest.server.util.helper.PortUsage;
 
 import java.io.IOException;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,7 +21,6 @@ import java.util.Map;
  */
 public class Server implements Runnable {
 
-    private static ServerSocket serverSocket;
     public static Configuration config;
     private static List<ConnectionHandler> conHandlers = new ArrayList<ConnectionHandler>();
     public static Map<Socket, String> players = new HashMap<Socket, String>();
@@ -45,12 +44,6 @@ public class Server implements Runnable {
         conHandlers.remove(conHandler);
     }
 
-    private void waitForConnection() throws IOException {
-        Socket clientSocket = serverSocket.accept();
-        System.out.println("Connected to: " + clientSocket.getInetAddress().getHostAddress());
-        conHandlers.add(new ConnectionHandler(clientSocket));
-    }
-
     public static void addPlayer(String username, Socket connection) throws IOException {
         Server.players.put(connection, username);
     }
@@ -70,14 +63,6 @@ public class Server implements Runnable {
             catch (IOException e) {}
         }
 
-        try {
-            serverSocket = new ServerSocket(config.serverPort, config.maxPlayers);
-            while(true) {
-                waitForConnection();
-            }
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
+        NetworkServer.start(config.serverHost, config.serverPort);
     }
 }

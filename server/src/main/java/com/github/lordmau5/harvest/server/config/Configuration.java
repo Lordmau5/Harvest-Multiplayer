@@ -13,6 +13,7 @@ public class Configuration {
     private String configFileName = "server.config";
 
     public String worldName;
+    public String serverHost = "0.0.0.0";
     public int serverPort;
     public int maxPlayers;
 
@@ -33,6 +34,8 @@ public class Configuration {
                 String[] lineSplit = currentLine.split("=");
                 if(lineSplit[0].equals("world-name"))
                     worldName = lineSplit[1];
+                if(lineSplit[0].equals("host"))
+                    serverHost = lineSplit[1];
                 if(lineSplit[0].equals("port")) {
                     try {
                         serverPort = Integer.parseInt(lineSplit[1]);
@@ -58,6 +61,10 @@ public class Configuration {
         }
         catch(FileNotFoundException e) {}
         catch(IOException e) {}
+
+        if(this.serverHost == null){
+            this.serverHost = "0.0.0.0";
+        }
     }
 
     public void getDefaultConfiguration() {
@@ -69,6 +76,7 @@ public class Configuration {
         PrintWriter writer;
         try {
             writer = new PrintWriter(new File(configLocation + configFileName), "UTF-8");
+            writer.println("host=" + this.serverHost);
             writer.println("world-name=" + worldName);
             writer.println("port=" + serverPort);
             writer.println("max-players=" + maxPlayers);
