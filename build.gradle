@@ -1,0 +1,53 @@
+apply plugin: 'java'
+apply plugin: 'idea'
+
+version = '1.0-SNAPSHOT'
+
+allprojects {
+    group = 'com.github.lordmau5'
+}
+
+subprojects {
+    apply plugin: 'java'
+
+    version = rootProject.version
+
+    //Compile for java 6
+    sourceCompatibility = '1.6'
+    targetCompatibility = '1.6'
+
+    repositories {
+        mavenCentral()
+    }
+
+    configurations{
+        packed
+        compile.extendsFrom packed
+    }
+
+    jar {
+        baseName = 'Harvest-' + baseName
+        destinationDir = new File(rootProject.getBuildDir(), 'libs')
+
+        manifest {
+            attributes 'Specification-Title': 'A multiplayer game where you can harvest things'
+            attributes 'Specification-Version': rootProject.version
+            attributes 'Specification-Vendor': 'Lordmau5'
+            attributes 'Implementation-Title': 'com.github.lordmau5.harvest'
+            attributes 'Implementation-Version': rootProject.version
+            attributes 'Implementation-Vendor': 'Lordmau5'
+        }
+
+        from {
+            configurations.packed.collect {
+                it.isDirectory() ? it : zipTree(it).matching {
+                    exclude "META-INF", "META-INF/**", "*META-INF*", "meta-inf"
+                    exclude "**.jar", "**/*.jar", "*.jar"
+                }
+            }
+        }
+    }
+}
+
+//Disable the default jar
+jar.enabled = false
