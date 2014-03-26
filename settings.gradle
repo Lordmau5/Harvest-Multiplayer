@@ -1,0 +1,5 @@
+rootProject.name = 'Harvest-Multiplayer'
+
+include 'shared'
+include 'client'
+include 'server'

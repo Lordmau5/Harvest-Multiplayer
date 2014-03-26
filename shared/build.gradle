@@ -1,0 +1,5 @@
+jar.destinationDir = new File(rootProject.getBuildDir(), 'artifacts')
+
+dependencies {
+    packed 'io.netty:netty-all:4.0.17.Final'
+}

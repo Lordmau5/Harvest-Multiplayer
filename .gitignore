@@ -1,6 +1,11 @@
 .git
+.gradle
 .idea
-config
+build
+runtime
+classes
 out
-server.config
 *.iml
+*.ipr
+*.iws
+*.jks
