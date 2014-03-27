@@ -1,6 +1,8 @@
 package com.github.lordmau5.harvest.network.packet.handshake;
 
+import com.github.lordmau5.harvest.network.ConnectionContext;
 import com.github.lordmau5.harvest.network.PacketUtils;
+import com.github.lordmau5.harvest.network.packet.Packet;
 import io.netty.buffer.ByteBuf;
 
 /**
@@ -8,7 +10,7 @@ import io.netty.buffer.ByteBuf;
  *
  * @author jk-5
  */
-public class PacketCloseConnection extends HandshakePacket {
+public class PacketCloseConnection extends Packet {
 
     public String reason;
 
@@ -25,5 +27,11 @@ public class PacketCloseConnection extends HandshakePacket {
     @Override
     public void decode(ByteBuf buffer){
         this.reason = PacketUtils.readString(buffer);
+    }
+
+    @Override
+    public void process(ConnectionContext ctx){
+        System.out.println("Closed. Reason: " + this.reason);
+        ctx.channel().close();
     }
 }
