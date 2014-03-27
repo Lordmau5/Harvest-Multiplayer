@@ -1,5 +1,6 @@
 package com.github.lordmau5.harvest.client.connection;
 
+import com.github.lordmau5.harvest.client.Client;
 import com.github.lordmau5.harvest.network.packet.play.ExamplePlayPacket;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -30,6 +31,7 @@ public class NetworkHandler {
             @Override
             public void operationComplete(ChannelFuture future) throws Exception{
                 System.out.println("Connected to server!");
+                Client.setConnectableState(false);
                 connected = true;
             }
         }).channel();
@@ -37,6 +39,7 @@ public class NetworkHandler {
             @Override
             public void operationComplete(ChannelFuture future) throws Exception{
                 System.out.println("Channel closed!");
+                Client.setConnectableState(true);
                 connected = false;
             }
         });
@@ -48,6 +51,10 @@ public class NetworkHandler {
     public static void onHandshakeComplete(){
         //Send the example play packet here. This isn't needed for anything, and is just an example
         channel.writeAndFlush(new ExamplePlayPacket());
+    }
+
+    public static void sendPacket(Object packet) {
+        channel.writeAndFlush(packet);
     }
 
     public static boolean isConnected(){

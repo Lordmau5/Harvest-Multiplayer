@@ -2,6 +2,7 @@ package com.github.lordmau5.harvest.client;
 
 import com.github.lordmau5.harvest.client.connection.NetworkHandler;
 import com.github.lordmau5.harvest.client.util.documents.MaxLengthDocument;
+import com.github.lordmau5.harvest.network.packet.handshake.PacketCloseConnection;
 import com.github.lordmau5.harvest.util.BufferedLoader;
 
 import javax.swing.*;
@@ -25,6 +26,7 @@ public class Client extends JFrame {
     private static JTextField serverAdress_box;
 
     private static JButton connect;
+    private static JButton disconnect;
     private static JButton testConnection;
 
     public Client() {
@@ -47,7 +49,7 @@ public class Client extends JFrame {
 
         logon.add(new JLabel());
         logon.add(connect);
-        logon.add(new JLabel());
+        logon.add(disconnect);
         logon.add(new JLabel());
         logon.add(testConnection);
 
@@ -59,6 +61,11 @@ public class Client extends JFrame {
         //pack();
         setResizable(false);
         setLocation(50, 50);
+    }
+
+    public static void setConnectableState(boolean state) {
+        connect.setEnabled(state);
+        disconnect.setEnabled(!state);
     }
 
     private void initComponents() {
@@ -85,6 +92,17 @@ public class Client extends JFrame {
                     playerName = playerName_box.getText();
                     connectToServer(serverAdress_box.getText());
                 }
+            }
+        });
+
+        disconnect = new JButton("Disconnect");
+        disconnect.setPreferredSize(new Dimension(100, 20));
+        disconnect.setHorizontalAlignment(SwingConstants.CENTER);
+        disconnect.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(NetworkHandler.isConnected())
+                    NetworkHandler.sendPacket(new PacketCloseConnection("Disconnect"));
             }
         });
 
