@@ -1,6 +1,7 @@
 package com.github.lordmau5.harvest.network;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.util.CharsetUtil;
 
 /**
  * No description given
@@ -19,7 +20,7 @@ public class PacketUtils {
             if(bytes > 5){
                 throw new RuntimeException("VarInt too big");
             }
-            if((in & 128) != 128){
+            if((in & 0x80) != 0x80){
                 break;
             }
         }
@@ -29,10 +30,10 @@ public class PacketUtils {
     public static void writeVarInt(int value, ByteBuf output){
         int part;
         while(true){
-            part = value & 127;
+            part = value & 0x7F;
             value >>>= 7;
-            if(value != 0){
-                part |= 128;
+            if (value != 0){
+                part |= 0x80;
             }
             output.writeByte(part);
             if(value == 0){
@@ -55,5 +56,18 @@ public class PacketUtils {
             return 4;
         }
         return 5;
+    }
+
+    public static String readString(ByteBuf buffer){
+        int len = readVarInt(buffer);
+        String str = buffer.toString(buffer.readerIndex(), len, CharsetUtil.UTF_8);
+        buffer.readerIndex(buffer.readerIndex() + len);
+        return str;
+    }
+
+    public static void writeString(String string, ByteBuf buffer){
+        byte[] bytes = string.getBytes(CharsetUtil.UTF_8);
+        writeVarInt(bytes.length, buffer);
+        buffer.writeBytes(bytes);
     }
 }

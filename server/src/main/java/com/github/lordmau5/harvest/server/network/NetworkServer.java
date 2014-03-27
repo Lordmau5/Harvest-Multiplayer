@@ -6,6 +6,10 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.util.AttributeKey;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * No description given
@@ -16,6 +20,10 @@ public class NetworkServer {
 
     private static EventLoopGroup boss;
     private static EventLoopGroup worker;
+
+    public static final List<ClientConnection> connections = new ArrayList<ClientConnection>();
+    public static final AttributeKey<ClientConnection> clientConnection = AttributeKey.valueOf("clientConnection");
+    public static final byte PROTOCOL_VERSION = 1;
 
     public static void start(String bindHost, int port){
         boss = new NioEventLoopGroup();
@@ -29,5 +37,15 @@ public class NetworkServer {
                 worker.shutdownGracefully();
             }
         }).syncUninterruptibly(); //TODO: remove this sync!
+    }
+
+    public static void onConnectionOpened(ClientConnection connection){
+        connections.add(connection);
+        System.out.println("Player " + connection.username() + "(" + connection.channel().remoteAddress().toString() + ") logged in!");
+    }
+
+    public static void onConnectionClosed(ClientConnection connection){
+        connections.remove(connection);
+        System.out.println("Player " + connection.username() + " logged out!");
     }
 }

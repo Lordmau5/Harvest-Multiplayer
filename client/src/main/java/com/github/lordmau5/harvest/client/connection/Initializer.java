@@ -1,10 +1,10 @@
-package com.github.lordmau5.harvest.server.network;
+package com.github.lordmau5.harvest.client.connection;
 
+import com.github.lordmau5.harvest.client.connection.handlers.HandshakeHandler;
+import com.github.lordmau5.harvest.client.connection.handlers.PacketHandler;
 import com.github.lordmau5.harvest.network.codec.HandshakeCodec;
 import com.github.lordmau5.harvest.network.codec.Varint21FrameDecoder;
 import com.github.lordmau5.harvest.network.codec.Varint21FramePrepender;
-import com.github.lordmau5.harvest.server.network.handler.HandshakeHandler;
-import com.github.lordmau5.harvest.server.network.handler.PacketHandler;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
@@ -14,11 +14,18 @@ import io.netty.channel.ChannelPipeline;
  *
  * @author jk-5
  */
-public class Initializer extends ChannelInitializer {
+public class Initializer extends ChannelInitializer<Channel> {
 
-    //The prepender is Sharable and threadsafe, so reuse it for each connection
     private static final Varint21FramePrepender prepender = new Varint21FramePrepender();
     private static final PacketHandler handler = new PacketHandler();
+
+    private final String host;
+    private final int port;
+
+    public Initializer(String host, int port){
+        this.host = host;
+        this.port = port;
+    }
 
     @Override
     protected void initChannel(Channel ch) throws Exception{
@@ -26,7 +33,7 @@ public class Initializer extends ChannelInitializer {
         pipe.addLast("framePrepender", prepender);
         pipe.addLast("frameDecoder", new Varint21FrameDecoder());
         pipe.addLast("handshakeCodec", new HandshakeCodec());
-        pipe.addLast("initialHandler", new HandshakeHandler());
+        pipe.addLast("initialHandler", new HandshakeHandler(this.host, this.port));
         pipe.addLast("packetHandler", handler);
     }
 }

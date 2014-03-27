@@ -1,34 +1,28 @@
 package com.github.lordmau5.harvest.client;
 
-import com.github.lordmau5.harvest.client.connection.ConnectionHandler;
+import com.github.lordmau5.harvest.client.connection.NetworkHandler;
 import com.github.lordmau5.harvest.client.util.documents.MaxLengthDocument;
-import com.github.lordmau5.harvest.client.util.documents.OnlyIntegerDocument;
 import com.github.lordmau5.harvest.util.BufferedLoader;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
-import java.net.ConnectException;
 
 /**
  * Author: Lordmau5
  * Date: 25.03.14
  * Time: 11:43
  */
-public class Client extends JFrame implements Runnable {
+public class Client extends JFrame {
 
     public static String playerName;
-    private static ConnectionHandler conHandler;
     public static BufferedLoader loader = new BufferedLoader();
 
     private static JLabel playerName_label;
     private static JTextField playerName_box;
     private static JLabel serverAdress;
     private static JTextField serverAdress_box;
-    private static JLabel serverAdressPort;
-    private static JTextField serverAdressPort_box;
 
     private static JButton connect;
     private static JButton testConnection;
@@ -51,9 +45,6 @@ public class Client extends JFrame implements Runnable {
         logon.add(serverAdress);
         logon.add(serverAdress_box);
 
-        logon.add(serverAdressPort);
-        logon.add(serverAdressPort_box);
-
         logon.add(new JLabel());
         logon.add(connect);
         logon.add(new JLabel());
@@ -70,13 +61,6 @@ public class Client extends JFrame implements Runnable {
         setLocation(50, 50);
     }
 
-    public static void setConnectState(boolean state) {
-        connect.setEnabled(state);
-        if(state) {
-            JOptionPane.showMessageDialog(null, "Server closed the connection!", "ERROR: Server closed connection!", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
     private void initComponents() {
         playerName_label = new JLabel("Username:");
         playerName_label.setPreferredSize(new Dimension(75, 20));
@@ -91,13 +75,6 @@ public class Client extends JFrame implements Runnable {
         serverAdress_box = new JTextField();
         serverAdress_box.setPreferredSize(new Dimension(200, 20));
 
-        serverAdressPort = new JLabel("Server Port:");
-        serverAdressPort.setPreferredSize(new Dimension(100, 20));
-        serverAdressPort.setHorizontalAlignment(SwingConstants.CENTER);
-        serverAdressPort_box = new JTextField();
-        serverAdressPort_box.setPreferredSize(new Dimension(200, 20));
-        serverAdressPort_box.setDocument(new OnlyIntegerDocument());
-
         connect = new JButton("Connect");
         connect.setPreferredSize(new Dimension(100, 20));
         connect.setHorizontalAlignment(SwingConstants.CENTER);
@@ -106,13 +83,7 @@ public class Client extends JFrame implements Runnable {
             public void actionPerformed(ActionEvent e) {
                 if(checkConnection()) {
                     playerName = playerName_box.getText();
-
-                    try {
-                        connectToServer(serverAdress_box.getText(), Integer.parseInt(serverAdressPort_box.getText()));
-                    }
-                    catch (IOException e1) {
-                        e1.printStackTrace();
-                    }
+                    connectToServer(serverAdress_box.getText());
                 }
             }
         });
@@ -123,12 +94,11 @@ public class Client extends JFrame implements Runnable {
         testConnection.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if(conHandler == null || conHandler.connection == null || conHandler.connection.isClosed()) {
-                    JOptionPane.showMessageDialog(null, "You are not connected!", "ERROR: Not connected!", JOptionPane.ERROR_MESSAGE);
-                    return;
+                if(NetworkHandler.isConnected()){
+                    JOptionPane.showMessageDialog(null, "Connected", "Connected", JOptionPane.INFORMATION_MESSAGE);
+                }else{
+                    JOptionPane.showMessageDialog(null, "Not Connected", "Not Connected", JOptionPane.INFORMATION_MESSAGE);
                 }
-                else
-                    conHandler.sendToServer("CLIENT - CONTEST");
             }
         });
     }
@@ -142,20 +112,21 @@ public class Client extends JFrame implements Runnable {
             JOptionPane.showMessageDialog(null, "You have to enter a server to play on!", "ERROR: No server defined!", JOptionPane.ERROR_MESSAGE);
             return false;
         }
-        if(serverAdressPort_box.getText().isEmpty()) {
-            serverAdressPort_box.setText("8095");
-        }
         return true;
     }
 
-    private void connectToServer(String adress, int port) throws IOException {
-        try {
-            conHandler = new ConnectionHandler(adress, port);
+    private void connectToServer(String adress) {
+        String[] parts = adress.split(":", 2);
+        String host = parts[0];
+        int port = 8095;
+        if(parts.length == 2){
+            try{
+                port = Integer.parseInt(parts[1]);
+            }catch(NumberFormatException ignored){
+
+            }
         }
-        catch(ConnectException e) {
-            JOptionPane.showMessageDialog(null, "Can't reach server. Did you misspell something?", "ERROR: Couldn't connect to server!", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+        NetworkHandler.connect(host, port);
     }
 
     public static void main(String args[]) {
@@ -166,7 +137,4 @@ public class Client extends JFrame implements Runnable {
             }
         });
     }
-
-    @Override
-    public void run() {}
 }

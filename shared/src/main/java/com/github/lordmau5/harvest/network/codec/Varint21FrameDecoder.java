@@ -2,6 +2,7 @@ package com.github.lordmau5.harvest.network.codec;
 
 import com.github.lordmau5.harvest.network.PacketUtils;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.handler.codec.CorruptedFrameException;
@@ -26,7 +27,7 @@ public class Varint21FrameDecoder extends ByteToMessageDecoder {
             }
             buf[i] = in.readByte();
             if(buf[i] >= 0){
-                int length = PacketUtils.readVarInt(in);
+                int length = PacketUtils.readVarInt(Unpooled.wrappedBuffer(buf));
                 if(in.readableBytes() < length){
                     in.resetReaderIndex();
                     return;

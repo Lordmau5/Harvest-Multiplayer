@@ -6,7 +6,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageCodec;
 
-import java.util.IdentityHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,8 +17,8 @@ import java.util.Map;
  */
 public abstract class PacketCodec extends ByteToMessageCodec<Packet> {
 
-    private Map<Integer, Class<? extends Packet>> idToClass = new IdentityHashMap<Integer, Class<? extends Packet>>();
-    private Map<Class<? extends Packet>, Integer> classToId = new IdentityHashMap<Class<? extends Packet>, Integer>();
+    private Map<Integer, Class<? extends Packet>> idToClass = new HashMap<Integer, Class<? extends Packet>>();
+    private Map<Class<? extends Packet>, Integer> classToId = new HashMap<Class<? extends Packet>, Integer>();
 
     public PacketCodec registerPacket(int id, Class<? extends Packet> packet){
         this.idToClass.put(id, packet);
