@@ -24,6 +24,7 @@ public class NetworkServer {
         b.bind().channel().closeFuture().addListener(new ChannelFutureListener() {
             @Override
             public void operationComplete(ChannelFuture future) throws Exception{
+                //Close the worker threads when the ServerChannel closes
                 boss.shutdownGracefully();
                 worker.shutdownGracefully();
             }
