@@ -12,7 +12,7 @@ import io.netty.buffer.ByteBuf;
  */
 public class PacketCloseConnection extends Packet {
 
-    public String reason;
+    public String reason = "N/A";
 
     public PacketCloseConnection(){}
     public PacketCloseConnection(String reason){

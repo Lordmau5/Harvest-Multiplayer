@@ -49,8 +49,7 @@ public class NetworkHandler {
      * This method is fired when the player logs in
      */
     public static void onHandshakeComplete(){
-        //Send the example play packet here. This isn't needed for anything, and is just an example
-        channel.writeAndFlush(new ExamplePlayPacket());
+        sendPacket(new ExamplePlayPacket());
     }
 
     public static void sendPacket(Object packet) {

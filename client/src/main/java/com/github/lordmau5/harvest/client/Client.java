@@ -3,7 +3,6 @@ package com.github.lordmau5.harvest.client;
 import com.github.lordmau5.harvest.client.connection.NetworkHandler;
 import com.github.lordmau5.harvest.client.util.documents.MaxLengthDocument;
 import com.github.lordmau5.harvest.network.packet.handshake.PacketCloseConnection;
-import com.github.lordmau5.harvest.util.BufferedLoader;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,7 +17,6 @@ import java.awt.event.ActionListener;
 public class Client extends JFrame {
 
     public static String playerName;
-    public static BufferedLoader loader = new BufferedLoader();
 
     private static JLabel playerName_label;
     private static JTextField playerName_box;
@@ -61,6 +59,7 @@ public class Client extends JFrame {
         //pack();
         setResizable(false);
         setLocation(50, 50);
+        setConnectableState(true);
     }
 
     public static void setConnectableState(boolean state) {
