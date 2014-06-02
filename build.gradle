@@ -4,7 +4,7 @@ apply plugin: 'idea'
 version = '1.0-SNAPSHOT'
 
 allprojects {
-    group = 'com.github.lordmau5'
+    group = 'com.lordmau5'
 }
 
 subprojects {
@@ -32,7 +32,7 @@ subprojects {
             attributes 'Specification-Title': 'A multiplayer game where you can harvest things'
             attributes 'Specification-Version': rootProject.version
             attributes 'Specification-Vendor': 'Lordmau5'
-            attributes 'Implementation-Title': 'com.github.lordmau5.harvest'
+            attributes 'Implementation-Title': 'com.lordmau5.harvest'
             attributes 'Implementation-Version': rootProject.version
             attributes 'Implementation-Vendor': 'Lordmau5'
         }
