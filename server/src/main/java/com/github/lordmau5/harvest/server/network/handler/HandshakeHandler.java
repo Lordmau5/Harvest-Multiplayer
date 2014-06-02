@@ -17,14 +17,13 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
  * @author jk-5
  */
 public class HandshakeHandler extends ChannelInboundHandlerAdapter {
-
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception{
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         //Only do packet handling with instanceof in this handshakehandler, just because it's easier
-        if(msg instanceof PacketClientHandshake){
+        if (msg instanceof PacketClientHandshake) {
             PacketClientHandshake packet = (PacketClientHandshake) msg;
             PacketCodec codec = CodecRegistry.getCodecForVersion(packet.protocolVersion);
-            if(codec == null){
+            if (codec == null) {
                 ctx.writeAndFlush(new PacketCloseConnection("Unknown protocol version")).addListener(ChannelFutureListener.CLOSE);
                 return;
             }
@@ -35,10 +34,10 @@ public class HandshakeHandler extends ChannelInboundHandlerAdapter {
             ClientConnection connection = new ClientConnection(packet.protocolVersion, packet.username, ctx.channel());
             ctx.channel().attr(NetworkServer.clientConnection).set(connection);
             NetworkServer.onConnectionOpened(connection);
-        }else if(msg instanceof PacketCloseConnection){
+        } else if (msg instanceof PacketCloseConnection) {
             System.out.println("Client closed connection. Reason: " + ((PacketCloseConnection) msg).reason);
             ctx.close();
-        }else{
+        } else {
             ctx.fireChannelRead(msg);
         }
     }

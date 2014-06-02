@@ -15,14 +15,13 @@ import io.netty.channel.ChannelPipeline;
  * @author jk-5
  */
 public class Initializer extends ChannelInitializer {
-
     //The prepender is Sharable and threadsafe, so reuse it for each connection
     private static final Varint21FramePrepender prepender = new Varint21FramePrepender();
     private static final PacketHandler handler = new PacketHandler();
 
     @Override
-    protected void initChannel(Channel ch) throws Exception{
-        ChannelPipeline pipe = ch.pipeline();
+    protected void initChannel(Channel channel) throws Exception {
+        ChannelPipeline pipe = channel.pipeline();
         pipe.addLast("framePrepender", prepender);
         pipe.addLast("frameDecoder", new Varint21FrameDecoder());
         pipe.addLast("handshakeCodec", new HandshakeCodec());

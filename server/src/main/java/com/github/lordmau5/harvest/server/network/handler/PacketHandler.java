@@ -13,14 +13,13 @@ import io.netty.channel.SimpleChannelInboundHandler;
  */
 @ChannelHandler.Sharable
 public class PacketHandler extends SimpleChannelInboundHandler<Packet> {
-
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, Packet msg) throws Exception{
+    protected void channelRead0(ChannelHandlerContext ctx, Packet msg) throws Exception {
         msg.process(ctx.channel().attr(NetworkServer.clientConnection).get());
     }
 
     @Override
-    public void channelInactive(ChannelHandlerContext ctx) throws Exception{
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         NetworkServer.onConnectionClosed(ctx.channel().attr(NetworkServer.clientConnection).get());
         ctx.fireChannelInactive();
     }

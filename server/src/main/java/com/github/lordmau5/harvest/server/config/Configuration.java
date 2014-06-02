@@ -8,13 +8,12 @@ import java.io.*;
  * Time: 13:13
  */
 public class Configuration {
-    private String configLocation = new File(".").getAbsolutePath();
-    private String configFileName = "server.config";
-
     public String worldName;
     public String serverHost = "0.0.0.0";
     public int serverPort;
     public int maxPlayers;
+    private String configLocation = new File(".").getAbsolutePath();
+    private String configFileName = "server.config";
 
     public Configuration() {
         configLocation = configLocation.substring(0, configLocation.length() - 1) + "config/";
