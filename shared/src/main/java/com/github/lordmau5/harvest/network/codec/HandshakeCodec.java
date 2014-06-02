@@ -10,8 +10,7 @@ import com.github.lordmau5.harvest.network.packet.handshake.PacketServerHandshak
  * @author jk-5
  */
 public class HandshakeCodec extends PacketCodec {
-
-    public HandshakeCodec(){
+    public HandshakeCodec() {
         this.registerPacket(1, PacketClientHandshake.class);
         this.registerPacket(2, PacketServerHandshake.class);
         this.registerPacket(3, PacketCloseConnection.class);

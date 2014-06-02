@@ -9,18 +9,17 @@ import java.util.Map;
  * @author jk-5
  */
 public class CodecRegistry {
-
     private static final Map<Integer, Class<? extends PacketCodec>> versionCodec = new HashMap<Integer, Class<? extends PacketCodec>>();
 
     static {
         versionCodec.put(1, PlayCodecV1.class);
     }
 
-    public static PacketCodec getCodecForVersion(int version){
-        try{
+    public static PacketCodec getCodecForVersion(int version) {
+        try {
             return versionCodec.get(version).newInstance();
-        }catch(Exception ignored){
-
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return null;
     }

@@ -8,6 +8,5 @@ import io.netty.channel.Channel;
  * @author jk-5
  */
 public interface ConnectionContext {
-
     public Channel channel();
 }

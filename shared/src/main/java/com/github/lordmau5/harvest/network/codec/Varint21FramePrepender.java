@@ -13,9 +13,8 @@ import io.netty.handler.codec.MessageToByteEncoder;
  */
 @ChannelHandler.Sharable
 public class Varint21FramePrepender extends MessageToByteEncoder<ByteBuf> {
-
     @Override
-    protected void encode(ChannelHandlerContext ctx, ByteBuf msg, ByteBuf out) throws Exception{
+    protected void encode(ChannelHandlerContext ctx, ByteBuf msg, ByteBuf out) throws Exception {
         int bodyLength = msg.readableBytes();
         int headerLength = PacketUtils.varIntSize(bodyLength);
         out.ensureWritable(headerLength + bodyLength);

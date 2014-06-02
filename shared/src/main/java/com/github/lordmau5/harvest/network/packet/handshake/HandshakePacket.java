@@ -9,9 +9,8 @@ import com.github.lordmau5.harvest.network.packet.Packet;
  * @author jk-5
  */
 public abstract class HandshakePacket extends Packet {
-
     @Override
-    public final void process(ConnectionContext ctx){
+    public final void process(ConnectionContext ctx) {
         //Handshake packets don't need this
     }
 }

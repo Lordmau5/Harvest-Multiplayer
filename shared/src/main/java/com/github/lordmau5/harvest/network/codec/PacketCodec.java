@@ -16,20 +16,19 @@ import java.util.Map;
  * @author jk-5
  */
 public abstract class PacketCodec extends ByteToMessageCodec<Packet> {
+    private Map<Integer, Class<? extends Packet>> idToClass = new HashMap<>();
+    private Map<Class<? extends Packet>, Integer> classToId = new HashMap<>();
 
-    private Map<Integer, Class<? extends Packet>> idToClass = new HashMap<Integer, Class<? extends Packet>>();
-    private Map<Class<? extends Packet>, Integer> classToId = new HashMap<Class<? extends Packet>, Integer>();
-
-    public PacketCodec registerPacket(int id, Class<? extends Packet> packet){
+    public PacketCodec registerPacket(int id, Class<? extends Packet> packet) {
         this.idToClass.put(id, packet);
         this.classToId.put(packet, id);
         return this;
     }
 
     @Override
-    protected void encode(ChannelHandlerContext ctx, Packet msg, ByteBuf out) throws Exception{
+    protected void encode(ChannelHandlerContext ctx, Packet msg, ByteBuf out) throws Exception {
         Class<? extends Packet> cl = msg.getClass();
-        if(!this.classToId.containsKey(cl)){
+        if (!this.classToId.containsKey(cl)) {
             throw new UnsupportedOperationException("Trying to send an unregistered packet (" + cl.getSimpleName() + ")");
         }
         int id = this.classToId.get(cl);
@@ -38,9 +37,9 @@ public abstract class PacketCodec extends ByteToMessageCodec<Packet> {
     }
 
     @Override
-    protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception{
+    protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
         int id = PacketUtils.readVarInt(in);
-        if(!this.idToClass.containsKey(id)){
+        if (!this.idToClass.containsKey(id)) {
             throw new UnsupportedOperationException("Received an unknown packet (id: " + id + ")");
         }
         Packet packet = this.idToClass.get(id).newInstance();
