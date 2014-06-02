@@ -8,7 +8,6 @@ import com.github.lordmau5.harvest.objects.AbstractObject;
  * Time: 14:00
  */
 public class Player extends AbstractObject {
-
     public Player() {
         super("player", true);
     }

@@ -10,7 +10,5 @@ import java.util.List;
  * Time: 20:05
  */
 public class World {
-
     private List<AbstractObject> objects;
-
 }

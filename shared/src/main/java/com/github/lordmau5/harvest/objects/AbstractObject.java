@@ -1,6 +1,6 @@
 package com.github.lordmau5.harvest.objects;
 
-//import com.github.lordmau5.harvest.client.Client;
+import org.lwjgl.util.Point;
 
 import java.awt.image.BufferedImage;
 
@@ -10,14 +10,12 @@ import java.awt.image.BufferedImage;
  * Time: 14:01
  */
 public abstract class AbstractObject {
-
     private BufferedImage image;
     private String textureName;
     private int textureHeight;
     private int textureWidth;
 
-    private int x;
-    private int y;
+    private Point position;
 
     public AbstractObject() {}
 
@@ -38,13 +36,14 @@ public abstract class AbstractObject {
     }
 
     public void setPosition(int x, int y) {
-        this.x = x;
-        this.y = y;
+        position.setLocation(x, y);
     }
 
-    public int[] getPosition() {
-        return new int[]{this.x, this.y};
+    public Point getPosition() {
+        return position;
     }
 
-    public boolean canPassThrough() { return false; }
+    public boolean canPassThrough() {
+        return false;
+    }
 }

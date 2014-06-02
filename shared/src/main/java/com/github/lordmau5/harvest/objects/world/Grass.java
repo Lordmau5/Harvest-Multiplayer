@@ -11,6 +11,4 @@ public class Grass extends AbstractObject {
     public Grass() {
         super("grass", false);
     }
-
-
 }
