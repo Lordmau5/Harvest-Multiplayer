@@ -15,20 +15,19 @@ import io.netty.channel.ChannelPipeline;
  * @author jk-5
  */
 public class Initializer extends ChannelInitializer<Channel> {
-
     private static final Varint21FramePrepender prepender = new Varint21FramePrepender();
     private static final PacketHandler handler = new PacketHandler();
 
     private final String host;
     private final int port;
 
-    public Initializer(String host, int port){
+    public Initializer(String host, int port) {
         this.host = host;
         this.port = port;
     }
 
     @Override
-    protected void initChannel(Channel ch) throws Exception{
+    protected void initChannel(Channel ch) throws Exception {
         ChannelPipeline pipe = ch.pipeline();
         pipe.addLast("framePrepender", prepender);
         pipe.addLast("frameDecoder", new Varint21FrameDecoder());

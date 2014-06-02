@@ -19,7 +19,7 @@ subprojects {
         mavenCentral()
     }
 
-    configurations{
+    configurations {
         packed
         compile.extendsFrom packed
     }

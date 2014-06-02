@@ -13,9 +13,8 @@ import io.netty.channel.SimpleChannelInboundHandler;
  */
 @ChannelHandler.Sharable
 public class PacketHandler extends SimpleChannelInboundHandler<Packet> {
-
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, Packet msg) throws Exception{
+    protected void channelRead0(ChannelHandlerContext ctx, Packet msg) throws Exception {
         msg.process(NetworkHandler.connection);
     }
 }

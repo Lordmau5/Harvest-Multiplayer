@@ -16,20 +16,17 @@ import io.netty.channel.socket.nio.NioSocketChannel;
  * @author jk-5
  */
 public class NetworkHandler {
-
+    public static final byte PROTOCOL_VERSION = 1;
+    public static ServerConnection connection;
     private static EventLoopGroup worker = new NioEventLoopGroup();
     private static Channel channel;
     private static boolean connected = false;
 
-    public static ServerConnection connection;
-
-    public static final byte PROTOCOL_VERSION = 1;
-
-    public static void connect(String host, int port){
-        Bootstrap b = new Bootstrap().group(worker).channel(NioSocketChannel.class).handler(new Initializer(host, port));
-        channel = b.connect(host, port).addListener(new ChannelFutureListener() {
+    public static void connect(String host, int port) {
+        Bootstrap bootstrap = new Bootstrap().group(worker).channel(NioSocketChannel.class).handler(new Initializer(host, port));
+        channel = bootstrap.connect(host, port).addListener(new ChannelFutureListener() {
             @Override
-            public void operationComplete(ChannelFuture future) throws Exception{
+            public void operationComplete(ChannelFuture future) throws Exception {
                 System.out.println("Connected to server!");
                 Client.setConnectableState(false);
                 connected = true;
@@ -37,7 +34,7 @@ public class NetworkHandler {
         }).channel();
         channel.closeFuture().addListener(new ChannelFutureListener() {
             @Override
-            public void operationComplete(ChannelFuture future) throws Exception{
+            public void operationComplete(ChannelFuture future) throws Exception {
                 System.out.println("Channel closed!");
                 Client.setConnectableState(true);
                 connected = false;
@@ -48,7 +45,7 @@ public class NetworkHandler {
     /**
      * This method is fired when the player logs in
      */
-    public static void onHandshakeComplete(){
+    public static void onHandshakeComplete() {
         sendPacket(new ExamplePlayPacket());
     }
 
@@ -56,7 +53,7 @@ public class NetworkHandler {
         channel.writeAndFlush(packet);
     }
 
-    public static boolean isConnected(){
+    public static boolean isConnected() {
         return connected;
     }
 }

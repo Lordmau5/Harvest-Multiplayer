@@ -10,21 +10,20 @@ import javax.swing.text.PlainDocument;
  * Time: 12:46
  */
 public class MaxLengthDocument extends PlainDocument {
+    private int maxLength = Integer.MAX_VALUE;
 
-    private int maxLength_ = Integer.MAX_VALUE;
     public MaxLengthDocument(final int maxLength) {
-        this.maxLength_ = maxLength;
+        this.maxLength = maxLength;
     }
 
-    public void insertString(final int offs, final String str,
-                             final AttributeSet a) throws BadLocationException {
+    public void insertString(final int offs, final String str, final AttributeSet a) throws BadLocationException {
         if (str == null) {
             return;
         }
+
         int actualLength = this.getLength();
-        if (actualLength + str.length() < this.maxLength_) {
+        if (actualLength + str.length() < this.maxLength) {
             super.insertString(offs, str, a);
         }
     }
-
 }

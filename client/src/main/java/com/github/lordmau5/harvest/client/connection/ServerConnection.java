@@ -9,15 +9,14 @@ import io.netty.channel.Channel;
  * @author jk-5
  */
 public class ServerConnection implements ConnectionContext {
-
     private final Channel channel;
 
-    public ServerConnection(Channel channel){
+    public ServerConnection(Channel channel) {
         this.channel = channel;
     }
 
     @Override
-    public Channel channel(){
+    public Channel channel() {
         return this.channel;
     }
 }

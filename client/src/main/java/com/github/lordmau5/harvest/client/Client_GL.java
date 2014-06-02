@@ -17,14 +17,20 @@ import java.io.IOException;
  * Time: 13:53
  */
 public class Client_GL {
-
-    float x = 400, y = 300;
+    float x = 400;
+    float y = 300;
     float rotation = 0;
     long lastFrame;
     int fps;
     long lastFPS;
 
     Texture texture;
+    float force = 1f;
+
+    public static void main(String args[]) {
+        Client_GL gl = new Client_GL();
+        gl.test();
+    }
 
     void loadImages() {
         try {
@@ -59,41 +65,52 @@ public class Client_GL {
         Display.destroy();
     }
 
-    float force = 1f;
-
     public void update(int delta) {
         if (Keyboard.isKeyDown(Keyboard.KEY_LEFT)) {
-            if(Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)) {
+            if (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)) {
                 rotation += 0.15f * delta * force;
                 force += 0.025f;
-                if(force > 15f)
+                if (force > 15f) {
                     force = 15f;
-            }
-            else {
+                }
+            } else {
                 x -= 0.35f * delta;
                 force = 1f;
             }
         }
+
         if (Keyboard.isKeyDown(Keyboard.KEY_RIGHT)) {
-            if(Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)) {
+            if (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)) {
                 rotation -= 0.15f * delta * force;
                 force += 0.025f;
-                if(force > 15f)
+                if (force > 15f) {
                     force = 15f;
-            }
-            else {
+                }
+            } else {
                 x += 0.35f * delta;
                 force = 1f;
             }
         }
 
-        if (Keyboard.isKeyDown(Keyboard.KEY_UP)) y -= 0.35f * delta;
-        if (Keyboard.isKeyDown(Keyboard.KEY_DOWN)) y += 0.35f * delta;
+        if (Keyboard.isKeyDown(Keyboard.KEY_UP)) {
+            y -= 0.35f * delta;
+        }
+        if (Keyboard.isKeyDown(Keyboard.KEY_DOWN)) {
+            y += 0.35f * delta;
+        }
 
-        if (x < 16) x = 16;
-        if (x > 800) x = 800;
-        if (y < 16) y = 16;
-        if (y > 600) y = 600;
+        if (x < 16) {
+            x = 16;
+        }
+        if (x > 800) {
+            x = 800;
+        }
+        if (y < 16) {
+            y = 16;
+        }
+        if (y > 600) {
+            y = 600;
+        }
 
         updateFPS(); // update FPS Counter
     }
@@ -116,6 +133,7 @@ public class Client_GL {
             fps = 0;
             lastFPS += 1000;
         }
+
         fps++;
     }
 
@@ -124,7 +142,7 @@ public class Client_GL {
         GL11.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-        GL11.glViewport(0,0,800,600);
+        GL11.glViewport(0, 0, 800, 600);
 
         GL11.glMatrixMode(GL11.GL_PROJECTION);
         GL11.glLoadIdentity();
@@ -138,8 +156,8 @@ public class Client_GL {
         //GL11.glColor3f(0.5f, 0.5f, 1.0f);
 
         texture.bind();
-        for(int tX = 0; tX < 2; tX++)
-            for(int tY = 0; tY < 2; tY++) {
+        for (int tX = 0; tX < 2; tX++)
+            for (int tY = 0; tY < 2; tY++) {
 
                 GL11.glPushMatrix();
                 GL11.glTranslatef(x + (tX * texture.getImageWidth()), y + (tY * texture.getImageHeight()), 0);
@@ -159,10 +177,4 @@ public class Client_GL {
                 GL11.glPopMatrix();
             }
     }
-
-    public static void main(String args[]) {
-        Client_GL gl = new Client_GL();
-        gl.test();
-    }
-
 }
