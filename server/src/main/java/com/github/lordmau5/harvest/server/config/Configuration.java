@@ -8,7 +8,6 @@ import java.io.*;
  * Time: 13:13
  */
 public class Configuration {
-
     private String configLocation = new File(".").getAbsolutePath();
     private String configFileName = "server.config";
 
@@ -23,46 +22,60 @@ public class Configuration {
     }
 
     public void readConfiguration(File configFile) {
-        if(!configFile.exists())
+        if (!configFile.exists()) {
             getDefaultConfiguration();
+        }
 
         String currentLine;
-        BufferedReader br;
+        BufferedReader reader;
+
         try {
-            br = new BufferedReader(new FileReader(configFile));
-            while((currentLine = br.readLine()) != null) {
+            reader = new BufferedReader(new FileReader(configFile));
+            while ((currentLine = reader.readLine()) != null) {
                 String[] lineSplit = currentLine.split("=");
-                if(lineSplit[0].equals("world-name"))
-                    worldName = lineSplit[1];
-                if(lineSplit[0].equals("host"))
-                    serverHost = lineSplit[1];
-                if(lineSplit[0].equals("port")) {
-                    try {
-                        serverPort = Integer.parseInt(lineSplit[1]);
-                        if(serverPort < 1 || serverPort > 65535)
+                switch (lineSplit[0]) {
+                    case "world-name": {
+                        worldName = lineSplit[1];
+                        break;
+                    }
+
+                    case "host": {
+                        serverHost = lineSplit[1];
+                        break;
+                    }
+
+                    case "port": {
+                        try {
+                            serverPort = Integer.parseInt(lineSplit[1]);
+                            if (serverPort < 1 || serverPort > 65535) {
+                                serverPort = 8095;
+                            }
+                        } catch (NumberFormatException e) {
                             serverPort = 8095;
+                        }
+                        break;
                     }
-                    catch(NumberFormatException e) {
-                        serverPort = 8095;
-                    }
-                }
-                if(lineSplit[0].equals("max-players")) {
-                    try {
-                        maxPlayers = Integer.parseInt(lineSplit[1]);
-                        if(maxPlayers > 4)
+
+                    case "max-players": {
+                        try {
+                            maxPlayers = Integer.parseInt(lineSplit[1]);
+                            if (maxPlayers > 4) {
+                                maxPlayers = 4;
+                            }
+                        } catch (NumberFormatException e) {
                             maxPlayers = 4;
-                    }
-                    catch(NumberFormatException e) {
-                        maxPlayers = 4;
+                        }
+                        break;
                     }
                 }
             }
-            br.close();
-        }
-        catch(FileNotFoundException e) {}
-        catch(IOException e) {}
 
-        if(this.serverHost == null){
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        if (this.serverHost == null) {
             this.serverHost = "0.0.0.0";
         }
     }
@@ -81,9 +94,8 @@ public class Configuration {
             writer.println("port=" + serverPort);
             writer.println("max-players=" + maxPlayers);
             writer.close();
+        } catch (FileNotFoundException | UnsupportedEncodingException e) {
+            e.printStackTrace();
         }
-        catch (FileNotFoundException e) {}
-        catch (UnsupportedEncodingException e) {}
     }
-
 }
