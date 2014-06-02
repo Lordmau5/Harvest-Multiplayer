@@ -1,9 +1,28 @@
+buildscript {
+    repositories {
+        maven {
+            url 'http://dl.bintray.com/cjstehno/public/'
+        }
+    }
+
+    dependencies {
+        classpath 'gradle-natives:gradle-natives:0.1'
+    }
+}
+
+apply plugin: 'natives'
+
 dependencies {
     packed project(":shared")
     packed 'org.lwjgl.lwjgl:lwjgl:2.9.1'
     packed 'org.slick2d:slick2d-core:1.0.1'
 }
 
+natives {
+    jars = ['lwjgl-platform-2.9.1-natives-windows']
+    platforms = 'windows'
+}
+
 jar.manifest {
-    attributes "Main-Class": "com.lordmau5.harvest.client.Client"
+    attributes "Main-Class": "com.lordmau5.harvest.client.Client_GL"
 }
