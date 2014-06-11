@@ -66,7 +66,7 @@ public class Client_GL {
         Display.destroy();
     }
 
-    float force = 1f;
+    float scale = 1f;
     boolean iterated = false;
 
     public void update(int delta) {
@@ -79,7 +79,6 @@ public class Client_GL {
             }
             else {
                 x -= 0.35f * delta;
-                force = 1f;
             }
         }
         else {
@@ -91,12 +90,21 @@ public class Client_GL {
             }
             else {
                 x += 0.35f * delta;
-                force = 1f;
             }
         }
 
-        if (Keyboard.isKeyDown(Keyboard.KEY_UP)) y -= 0.35f * delta;
-        if (Keyboard.isKeyDown(Keyboard.KEY_DOWN)) y += 0.35f * delta;
+        if (Keyboard.isKeyDown(Keyboard.KEY_UP)) {
+            scale += 0.05f;
+            if(scale > 4f)
+                scale = 4f;
+            y -= 0.35f * delta;
+        }
+        if (Keyboard.isKeyDown(Keyboard.KEY_DOWN)) {
+            scale -= 0.05f;
+            if(scale < 1f)
+                scale = 1f;
+            y += 0.35f * delta;
+        }
 
         if (x < 16) x = 16;
         if (x > 800) x = 800;
@@ -120,7 +128,7 @@ public class Client_GL {
 
     public void updateFPS() {
         if (getTime() - lastFPS > 1000) {
-            Display.setTitle("FPS: " + fps + " | Force: " + force);
+            Display.setTitle("FPS: " + fps + " | Scale: " + scale);
             fps = 0;
             lastFPS += 1000;
         }
@@ -132,11 +140,11 @@ public class Client_GL {
         GL11.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         //GL11.glViewport(0, 0, 800, 600);
 
-        GL11.glEnable(GL11.GL_CULL_FACE);
-        GL11.glCullFace(GL11.GL_BACK);
+        //GL11.glEnable(GL11.GL_CULL_FACE);
+        //GL11.glCullFace(GL11.GL_BACK);
 
         GL11.glMatrixMode(GL11.GL_PROJECTION);
-        //GL11.glLoadIdentity();
+        GL11.glLoadIdentity();
         GL11.glOrtho(0, 800, 600, 0, 1, -1);
         //GL11.glMatrixMode(GL11.GL_TEXTURE);
         GL11.glMatrixMode(GL11.GL_MODELVIEW);
@@ -145,13 +153,19 @@ public class Client_GL {
     public void renderGL() {
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
 
+        GL11.glPushMatrix();
+        GL11.glTranslatef(x, y, 0);
+
         //GL11.glColor3f(0.5f, 0.5f, 1.0f);
 
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, objectTexture.getTexture());
+        GL11.glBindTexture(ARBTextureRectangle.GL_TEXTURE_RECTANGLE_ARB, objectTexture.getTexture());
         int sX = currentSprite.getX();
         int sY = currentSprite.getY();
         int sX2 = currentSprite.getX() + currentSprite.getWidth();
         int sY2 = currentSprite.getY() + currentSprite.getHeight();
+
+        GL11.glRotatef(180, 0, 0, 0);
+        GL11.glScalef(scale, scale, 0);
 
         //GL11.glPushMatrix();
         //GL11.glRotatef(rotation, 0f, 0f, 1f);
@@ -178,6 +192,7 @@ public class Client_GL {
         GL11.glEnd();
         //GL11.glTranslatef(x + currentSprite.getWidth(), y + currentSprite.getHeight(), 0);
         GL11.glBindTexture(ARBTextureRectangle.GL_TEXTURE_RECTANGLE_ARB, 0);
+        GL11.glPopMatrix();
         //GL11.glPopMatrix();
     }
 

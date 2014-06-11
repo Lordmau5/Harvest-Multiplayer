@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TextureAtlas imagePath="objectSheet.png">
+   <SubTexture name="stone_big" x="0" y="0" width="32" height="32" />
+   <SubTexture name="stone_big2" x="33" y="0" width="32" height="32" />
+   <SubTexture name="grass" x="0" y="33" width="16" height="16" />
+   <SubTexture name="stone" x="17" y="33" width="16" height="16" />
+   <SubTexture name="log" x="34" y="33" width="16" height="16" />
+   <SubTexture name="log_big" x="66" y="0" width="32" height="32" />
+</TextureAtlas>
