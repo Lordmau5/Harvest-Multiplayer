@@ -1,17 +1,19 @@
-package com.github.lordmau5.harvest.client;
+package com.lordmau5.harvest.client;
 
+import com.lordmau5.harvest.client.util.texture.Sprite;
+import com.lordmau5.harvest.client.util.texture.Texture;
+import com.lordmau5.harvest.objects.AbstractObject;
+import com.lordmau5.harvest.objects.ObjectRegister;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.Sys;
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.opengl.ARBTextureRectangle;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.TrueTypeFont;
-import org.newdawn.slick.opengl.Texture;
-import org.newdawn.slick.opengl.TextureLoader;
 
 import java.awt.*;
-import java.io.IOException;
 
 /**
  * Author: Lordmau5
@@ -21,22 +23,22 @@ import java.io.IOException;
 public class Client_GL {
 
     float x = 400, y = 300;
-    float rotation = 0;
     long lastFrame;
     int fps;
     long lastFPS;
 
-    Texture texture;
+    //Texture texture;
     TrueTypeFont testFont;
 
+    static Texture objectTexture;
+    static Sprite currentSprite;
+
     void loadImages() {
-        try {
-            texture = TextureLoader.getTexture("PNG", org.newdawn.slick.util.ResourceLoader.getResourceAsStream("textures/objects/stone.png"));
-            testFont = new TrueTypeFont(new Font("Times New Roman", Font.BOLD, 24), false);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        objectTexture = new Texture("objectSheet", false);
+        //texture = TextureLoader.getTexture("PNG", org.newdawn.slick.util.ResourceLoader.getResourceAsStream("textures/objects/stone.png"));
+        testFont = new TrueTypeFont(new Font("Times New Roman", Font.BOLD, 24), false);
     }
+
 
     void test() {
         try {
@@ -47,6 +49,7 @@ public class Client_GL {
         }
         initGL(); // init OpenGL
         loadImages();
+        currentSprite = objectTexture.getSprite("grass");
 
         getDelta(); // call once before loop to initialise lastFrame
         lastFPS = getTime(); // call before loop to initialise fps timer
@@ -64,26 +67,27 @@ public class Client_GL {
     }
 
     float force = 1f;
+    boolean iterated = false;
 
     public void update(int delta) {
+        boolean shift = Keyboard.isKeyDown(Keyboard.KEY_LSHIFT);
         if (Keyboard.isKeyDown(Keyboard.KEY_LEFT)) {
-            if(Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)) {
-                rotation += 0.15f * delta * force;
-                force += 0.025f;
-                if(force > 15f)
-                    force = 15f;
+            if(shift && !iterated) {
+                currentSprite = objectTexture.nextSprite(currentSprite);
+                System.out.println(currentSprite.getName());
+                iterated = true;
             }
             else {
                 x -= 0.35f * delta;
                 force = 1f;
             }
         }
+        else {
+            iterated = false;
+        }
         if (Keyboard.isKeyDown(Keyboard.KEY_RIGHT)) {
-            if(Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)) {
-                rotation -= 0.15f * delta * force;
-                force += 0.025f;
-                if(force > 15f)
-                    force = 15f;
+            if(shift) {
+                currentSprite = objectTexture.getSprite("stone");
             }
             else {
                 x += 0.35f * delta;
@@ -124,44 +128,72 @@ public class Client_GL {
     }
 
     public void initGL() {
-        GL11.glEnable(GL11.GL_TEXTURE_2D);
+        GL11.glEnable(ARBTextureRectangle.GL_TEXTURE_RECTANGLE_ARB);
         GL11.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-        GL11.glEnable(GL11.GL_BLEND);
-        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-        GL11.glViewport(0,0,800,600);
+        //GL11.glViewport(0, 0, 800, 600);
+
+        GL11.glEnable(GL11.GL_CULL_FACE);
+        GL11.glCullFace(GL11.GL_BACK);
 
         GL11.glMatrixMode(GL11.GL_PROJECTION);
-        GL11.glLoadIdentity();
+        //GL11.glLoadIdentity();
         GL11.glOrtho(0, 800, 600, 0, 1, -1);
+        //GL11.glMatrixMode(GL11.GL_TEXTURE);
         GL11.glMatrixMode(GL11.GL_MODELVIEW);
     }
 
     public void renderGL() {
-        GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+        GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
 
         //GL11.glColor3f(0.5f, 0.5f, 1.0f);
 
-        texture.bind();
-        GL11.glPushMatrix();
-        GL11.glTranslatef(x + texture.getImageWidth(), y + texture.getImageHeight(), 0);
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, objectTexture.getTexture());
+        int sX = currentSprite.getX();
+        int sY = currentSprite.getY();
+        int sX2 = currentSprite.getX() + currentSprite.getWidth();
+        int sY2 = currentSprite.getY() + currentSprite.getHeight();
+
+        //GL11.glPushMatrix();
         //GL11.glRotatef(rotation, 0f, 0f, 1f);
-        GL11.glTranslatef(-x - texture.getImageWidth(), -y - texture.getImageHeight(), 0);
+        //GL11.glTranslatef(-x - currentSprite.getWidth(), -y - currentSprite.getHeight(), 0);
 
         GL11.glBegin(GL11.GL_QUADS);
-            GL11.glTexCoord2f(0, 0);
-            GL11.glVertex2f(x - texture.getImageWidth(), y - texture.getImageHeight());
+            /*GL11.glTexCoord2f(0, 0);
+            GL11.glVertex2f(x - currentSprite.getWidth(), y - currentSprite.getHeight());
             GL11.glTexCoord2f(1, 0);
-            GL11.glVertex2f(x + texture.getImageWidth(), y - texture.getImageHeight());
+            GL11.glVertex2f(x + currentSprite.getWidth(), y - currentSprite.getHeight());
             GL11.glTexCoord2f(1, 1);
-            GL11.glVertex2f(x + texture.getImageWidth(), y + texture.getImageHeight());
+            GL11.glVertex2f(x + currentSprite.getWidth(), y + currentSprite.getHeight());
             GL11.glTexCoord2f(0, 1);
-            GL11.glVertex2f(x - texture.getImageWidth(), y + texture.getImageHeight());
+            GL11.glVertex2f(x - currentSprite.getWidth(), y + currentSprite.getHeight());*/
+
+            GL11.glTexCoord2f(sX, sY2);
+            GL11.glVertex2f(sX, sY);
+            GL11.glTexCoord2f(sX2, sY2);
+            GL11.glVertex2f(sX2, sY);
+            GL11.glTexCoord2f(sX2, sY);
+            GL11.glVertex2f(sX2, sY2);
+            GL11.glTexCoord2f(sX, sY);
+            GL11.glVertex2f(sX, sY2);
         GL11.glEnd();
-        GL11.glPopMatrix();
+        //GL11.glTranslatef(x + currentSprite.getWidth(), y + currentSprite.getHeight(), 0);
+        GL11.glBindTexture(ARBTextureRectangle.GL_TEXTURE_RECTANGLE_ARB, 0);
+        //GL11.glPopMatrix();
+    }
+
+    static void setupTextures() {
+        System.out.println("Objects, please?");
+        for(AbstractObject object : ObjectRegister.getObjectList()) {
+            System.out.println(object.getTextureName());
+        }
     }
 
     public static void main(String args[]) {
         Client_GL gl = new Client_GL();
+
+        ObjectRegister.init();
+        setupTextures();
+
         gl.test();
     }
 
