@@ -94,16 +94,24 @@ public class Client_GL {
         }
 
         if (Keyboard.isKeyDown(Keyboard.KEY_UP)) {
-            scale += 0.05f;
-            if(scale > 4f)
-                scale = 4f;
-            y -= 0.35f * delta;
+            if(shift) {
+                scale += 0.05f;
+                if(scale > 4f)
+                    scale = 4f;
+            }
+            else {
+                y -= 0.35f * delta;
+            }
         }
         if (Keyboard.isKeyDown(Keyboard.KEY_DOWN)) {
-            scale -= 0.05f;
-            if(scale < 1f)
-                scale = 1f;
-            y += 0.35f * delta;
+            if(shift) {
+                scale -= 0.05f;
+                if(scale < 1f)
+                    scale = 1f;
+            }
+            else {
+                y += 0.35f * delta;
+            }
         }
 
         if (x < 16) x = 16;
@@ -154,7 +162,7 @@ public class Client_GL {
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
 
         GL11.glPushMatrix();
-        GL11.glTranslatef(x, y, 0);
+        //GL11.glTranslatef(x, y, 0);
 
         //GL11.glColor3f(0.5f, 0.5f, 1.0f);
 
@@ -164,12 +172,12 @@ public class Client_GL {
         int sX2 = currentSprite.getX() + currentSprite.getWidth();
         int sY2 = currentSprite.getY() + currentSprite.getHeight();
 
+        GL11.glTranslatef(x, y, 0);
         GL11.glRotatef(180, 0, 0, 0);
         GL11.glScalef(scale, scale, 0);
 
         //GL11.glPushMatrix();
         //GL11.glRotatef(rotation, 0f, 0f, 1f);
-        //GL11.glTranslatef(-x - currentSprite.getWidth(), -y - currentSprite.getHeight(), 0);
 
         GL11.glBegin(GL11.GL_QUADS);
             /*GL11.glTexCoord2f(0, 0);
