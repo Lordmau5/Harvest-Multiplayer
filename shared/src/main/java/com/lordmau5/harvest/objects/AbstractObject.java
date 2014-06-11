@@ -1,6 +1,6 @@
 package com.lordmau5.harvest.objects;
 
-import org.lwjgl.util.Point;
+import com.lordmau5.harvest.environment.Point;
 
 /**
  * Author: Lordmau5
@@ -19,18 +19,24 @@ public abstract class AbstractObject {
         this.textureName = textureName;
         this.isAnimated = isAnimated;
 
+        this.position = new Point();
         ObjectRegister.addObject(this);
     }
 
-    public String getTextureName() { return this.textureName; }
-    public boolean isAnimated() { return this.isAnimated; }
+    public AbstractObject(String textureName, boolean isAnimated, int x, int y) {
+        this(textureName, isAnimated);
+        setPosition(x, y);
+    }
+
+    public String getTextureName() { return textureName; }
+    public boolean isAnimated() { return isAnimated; }
 
     public void setPosition(int x, int y) {
-        this.position.setLocation(x, y);
+        position.setXY(x, y);
     }
 
     public Point getPosition() {
-        return this.position;
+        return position;
     }
 
     public boolean canPassThrough() {

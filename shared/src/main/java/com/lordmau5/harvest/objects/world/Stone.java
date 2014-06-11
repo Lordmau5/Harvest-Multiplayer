@@ -9,4 +9,7 @@ import com.lordmau5.harvest.objects.AbstractObject;
 public class Stone extends AbstractObject {
 
     public Stone() { super("stone", false); }
+    public Stone(int x, int y) {
+        super("stone", false, x, y);
+    }
 }

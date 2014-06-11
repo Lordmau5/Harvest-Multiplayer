@@ -29,8 +29,7 @@ public class Texture {
     String textureName;
     boolean animated;
     Map<String, Sprite> spriteMap = new HashMap<>();
-    Sprite sprite;
-    static int texture;
+    int texture;
 
     public Texture(String textureName, boolean animated) {
         this.textureName = textureName;
@@ -85,7 +84,7 @@ public class Texture {
         }
     }
 
-    private static void cleanUp(boolean asCrash) {
+    private void cleanUp(boolean asCrash) {
         GL11.glDeleteTextures(texture);
         Display.destroy();
         System.exit(asCrash ? 1 : 0);

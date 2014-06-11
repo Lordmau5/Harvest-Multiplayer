@@ -1,8 +1,5 @@
 package com.lordmau5.harvest.objects;
 
-import com.lordmau5.harvest.objects.world.Grass;
-import com.lordmau5.harvest.objects.world.Stone;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,8 +21,8 @@ public class ObjectRegister {
     }
 
     public static void init() {
-        new Grass();
-        new Stone();
+        //new Grass();
+        //new Stone();
     }
 
 }
