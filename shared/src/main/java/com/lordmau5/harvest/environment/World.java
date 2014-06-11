@@ -15,16 +15,14 @@ public class World {
     private List<AbstractObject> objects = new ArrayList<>();
 
     public World() {
-        addObject(new Stone(100, 100));
-        addObject(new Stone(100, 116));
-        addObject(new Stone(116, 100));
-        addObject(new Stone(116, 116));
+        for(int y=0; y<4; y++)
+            for(int x=0; x<4; x++)
+                addObject(new Stone(100 + x * 16, 100 + y * 16));
     }
 
     public void addObject(AbstractObject object) {
         if(!objects.contains(object)) {
             objects.add(object);
-            System.out.println(object.getPosition().getX() + " - " + object.getPosition().getY());
         }
     }
 

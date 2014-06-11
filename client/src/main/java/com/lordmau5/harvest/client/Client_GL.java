@@ -173,10 +173,10 @@ public class Client_GL {
         }
         //-------------------------------------------------
 
-        if (pPos.getX() < 0) pPos.setXY(0, pPos.getY());
-        if (pPos.getX() > 800 - player.getProperSprite().getWidth()) pPos.setXY(800 - player.getProperSprite().getWidth(), pPos.getY());
-        if (pPos.getY() < 0) pPos.setXY(pPos.getX(), 0);
-        if (pPos.getY() > 600 - player.getProperSprite().getHeight()) pPos.setXY(pPos.getX(), 600 - player.getProperSprite().getHeight());
+        if (pPos.getX() < player.getProperSprite().getWidth()) pPos.setXY(player.getProperSprite().getWidth(), pPos.getY());
+        if (pPos.getX() > 800) pPos.setXY(800, pPos.getY());
+        if (pPos.getY() < player.getProperSprite().getHeight()) pPos.setXY(pPos.getX(), player.getProperSprite().getHeight());
+        if (pPos.getY() > 600) pPos.setXY(pPos.getX(), 600);
 
         updateFPS(); // update FPS Counter
     }
@@ -204,7 +204,7 @@ public class Client_GL {
 
     public void initGL() {
         GL11.glEnable(ARBTextureRectangle.GL_TEXTURE_RECTANGLE_ARB);
-        GL11.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        //GL11.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         //GL11.glViewport(0, 0, 800, 600);
@@ -223,30 +223,34 @@ public class Client_GL {
     public void renderGL() {
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
 
+        Point point;
+        Sprite sprite;
+        int sX, sY, sX2, sY2;
+
         GL11.glPushMatrix();
 
         GL11.glBindTexture(ARBTextureRectangle.GL_TEXTURE_RECTANGLE_ARB, objectTexture.getTexture());
         for(AbstractObject object : world.getObjects()) {
-            Point point = object.getPosition();
-            Sprite sprite = objectTexture.getSprite(object.getTextureName());
-            int sX = sprite.getX();
-            int sY = sprite.getY();
-            int sX2 = sprite.getX() + sprite.getWidth();
-            int sY2 = sprite.getY() + sprite.getHeight();
+            point = object.getPosition();
+            sprite = objectTexture.getSprite(object.getTextureName());
+            sX = sprite.getX();
+            sY = sprite.getY();
+            sX2 = sprite.getX() + sprite.getWidth();
+            sY2 = sprite.getY() + sprite.getHeight();
 
-            GL11.glTranslatef(point.getX() + sX2 * scale, point.getY() + sY2 * scale, 0);
-            GL11.glRotatef(180, 0, 0, 0);
+            GL11.glLoadIdentity(); // Load the Identity Matrix to reset our drawing locations
+            GL11.glTranslatef(point.getX(), point.getY(), 0);
             GL11.glScalef(scale, scale, 0);
 
-            GL11.glBegin(GL11.GL_QUADS);
-                GL11.glTexCoord2f(sX, sY2);
-                GL11.glVertex2f(sX, sY);
-                GL11.glTexCoord2f(sX2, sY2);
-                GL11.glVertex2f(sX2, sY);
-                GL11.glTexCoord2f(sX2, sY);
-                GL11.glVertex2f(sX2, sY2);
+            GL11.glBegin(GL11.GL_TRIANGLE_STRIP);
                 GL11.glTexCoord2f(sX, sY);
+                GL11.glVertex2f(sX, sY);
+                GL11.glTexCoord2f(sX2, sY);
+                GL11.glVertex2f(sX2, sY);
+                GL11.glTexCoord2f(sX, sY2);
                 GL11.glVertex2f(sX, sY2);
+                GL11.glTexCoord2f(sX2, sY2);
+                GL11.glVertex2f(sX2, sY2);
             GL11.glEnd();
         }
         GL11.glBindTexture(ARBTextureRectangle.GL_TEXTURE_RECTANGLE_ARB, 0);
@@ -258,26 +262,26 @@ public class Client_GL {
         GL11.glPushMatrix();
 
         GL11.glBindTexture(ARBTextureRectangle.GL_TEXTURE_RECTANGLE_ARB, player.texture.getTexture());
-        Point point = player.getPosition();
-        Sprite sprite = player.getProperSprite();
-        int sX = sprite.getX();
-        int sY = sprite.getY();
-        int sX2 = sprite.getX() + sprite.getWidth();
-        int sY2 = sprite.getY() + sprite.getHeight();
+        point = player.getPosition();
+        sprite = player.getProperSprite();
+        sX = sprite.getX();
+        sY = sprite.getY();
+        sX2 = sprite.getX() + sprite.getWidth();
+        sY2 = sprite.getY() + sprite.getHeight();
 
-        GL11.glTranslatef(point.getX() + sX2 * scale, point.getY() + sY2 * scale, 0);
-        GL11.glRotatef(180, 0, 0, 0);
+        GL11.glTranslatef(point.getX() - sX2 * scale, point.getY() - sY2 * scale, 0);
+        //GL11.glRotatef(180, 0, 0, 0);
         GL11.glScalef(scale, scale, 0);
 
-        GL11.glBegin(GL11.GL_QUADS);
-            GL11.glTexCoord2f(sX, sY2);
-            GL11.glVertex2f(sX, sY);
-            GL11.glTexCoord2f(sX2, sY2);
-            GL11.glVertex2f(sX2, sY);
-            GL11.glTexCoord2f(sX2, sY);
-            GL11.glVertex2f(sX2, sY2);
+        GL11.glBegin(GL11.GL_TRIANGLE_STRIP);
             GL11.glTexCoord2f(sX, sY);
+            GL11.glVertex2f(sX, sY);
+            GL11.glTexCoord2f(sX2, sY);
+            GL11.glVertex2f(sX2, sY);
+            GL11.glTexCoord2f(sX, sY2);
             GL11.glVertex2f(sX, sY2);
+            GL11.glTexCoord2f(sX2, sY2);
+            GL11.glVertex2f(sX2, sY2);
         GL11.glEnd();
 
         GL11.glBindTexture(ARBTextureRectangle.GL_TEXTURE_RECTANGLE_ARB, 0);
@@ -285,18 +289,10 @@ public class Client_GL {
         GL11.glPopMatrix();
     }
 
-    static void setupTextures() {
-        System.out.println("Objects, please?");
-        for(AbstractObject object : ObjectRegister.getObjectList()) {
-            System.out.println(object.getTextureName());
-        }
-    }
-
     public static void main(String args[]) {
         Client_GL gl = new Client_GL();
 
         ObjectRegister.init();
-        setupTextures();
 
         gl.test();
     }

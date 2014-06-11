@@ -25,7 +25,8 @@ public abstract class AbstractObject {
 
     public AbstractObject(String textureName, boolean isAnimated, int x, int y) {
         this(textureName, isAnimated);
-        setPosition(x, y);
+        this.position = new Point(x, y);
+        System.out.println(position.getX() + " - " + position.getY());
     }
 
     public String getTextureName() { return textureName; }
