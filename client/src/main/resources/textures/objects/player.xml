@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TextureAtlas imagePath="player.png">
+   <SubTexture name="player_DOWN_0" x="92" y="58" width="19" height="28" />
+   <SubTexture name="player_DOWN_1" x="112" y="58" width="18" height="28" />
+   <SubTexture name="player_DOWN_2" x="66" y="85" width="19" height="28" />
+   <SubTexture name="player_DOWN_3" x="185" y="0" width="17" height="28" />
+   <SubTexture name="player_LEFT_0" x="50" y="29" width="22" height="28" />
+   <SubTexture name="player_LEFT_1" x="46" y="58" width="22" height="26" />
+   <SubTexture name="player_LEFT_2" x="73" y="28" width="22" height="28" />
+   <SubTexture name="player_LEFT_3" x="54" y="0" width="23" height="27" />
+   <SubTexture name="player_RIGHT_0" x="102" y="0" width="22" height="28" />
+   <SubTexture name="player_RIGHT_1" x="69" y="58" width="22" height="26" />
+   <SubTexture name="player_RIGHT_2" x="96" y="29" width="22" height="28" />
+   <SubTexture name="player_RIGHT_3" x="78" y="0" width="23" height="27" />
+   <SubTexture name="player_UP_0" x="86" y="87" width="19" height="28" />
+   <SubTexture name="player_UP_1" x="46" y="85" width="19" height="29" />
+   <SubTexture name="player_UP_2" x="106" y="87" width="19" height="28" />
+   <SubTexture name="player_UP_3" x="139" y="29" width="18" height="29" />
+   <SubTexture name="player_RUN_DOWN_0" x="203" y="0" width="16" height="27" />
+   <SubTexture name="player_RUN_DOWN_1" x="119" y="29" width="19" height="27" />
+   <SubTexture name="player_RUN_DOWN_2" x="176" y="29" width="16" height="27" />
+   <SubTexture name="player_RUN_DOWN_3" x="165" y="0" width="19" height="27" />
+   <SubTexture name="player_RUN_LEFT_0" x="0" y="29" width="24" height="25" />
+   <SubTexture name="player_RUN_LEFT_1" x="0" y="55" width="22" height="28" />
+   <SubTexture name="player_RUN_LEFT_2" x="0" y="0" width="26" height="28" />
+   <SubTexture name="player_RUN_LEFT_3" x="23" y="55" width="22" height="28" />
+   <SubTexture name="player_RUN_RIGHT_0" x="25" y="29" width="24" height="25" />
+   <SubTexture name="player_RUN_RIGHT_1" x="0" y="84" width="22" height="28" />
+   <SubTexture name="player_RUN_RIGHT_2" x="27" y="0" width="26" height="28" />
+   <SubTexture name="player_RUN_RIGHT_3" x="23" y="84" width="22" height="28" />
+   <SubTexture name="player_RUN_UP_0" x="158" y="29" width="17" height="28" />
+   <SubTexture name="player_RUN_UP_1" x="125" y="0" width="19" height="28" />
+   <SubTexture name="player_RUN_UP_2" x="131" y="59" width="16" height="29" />
+   <SubTexture name="player_RUN_UP_3" x="145" y="0" width="19" height="28" />
+</TextureAtlas>

@@ -42,7 +42,7 @@ public class Client_GL {
     void loadImages() {
         objectTexture = new Texture("objectSheet", false);
         //texture = TextureLoader.getTexture("PNG", org.newdawn.slick.util.ResourceLoader.getResourceAsStream("textures/objects/stone.png"));
-        testFont = new TrueTypeFont(new Font("Times New Roman", Font.BOLD, 24), false);
+        testFont = new TrueTypeFont(new Font("Arial", Font.PLAIN, 48), true);
     }
 
 
@@ -57,7 +57,7 @@ public class Client_GL {
         initGL(); // init OpenGL
         loadImages();
         world = new World();
-        player = new ClientPlayer();
+        player = new ClientPlayer("Lordmau5");
 
         System.out.println(objectTexture.getTexture() + " - " + player.texture.getTexture());
 
@@ -68,7 +68,7 @@ public class Client_GL {
             int delta = getDelta();
 
             update(delta);
-            renderGL();
+            renderGL_Back();
 
             if(frameCount++ == 8) {
                 frameCount = 0;
@@ -205,6 +205,10 @@ public class Client_GL {
     public void initGL() {
         GL11.glEnable(ARBTextureRectangle.GL_TEXTURE_RECTANGLE_ARB);
         //GL11.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        GL11.glEnable(GL11.GL_TEXTURE_2D);
+        GL11.glShadeModel(GL11.GL_SMOOTH);
+        GL11.glDisable(GL11.GL_DEPTH_TEST);
+        GL11.glDisable(GL11.GL_LIGHTING);
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         //GL11.glViewport(0, 0, 800, 600);
@@ -220,7 +224,7 @@ public class Client_GL {
     }
 
     float scale = 1f;
-    public void renderGL() {
+    public void renderGL_Back() {
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
 
         Point point;
@@ -270,7 +274,6 @@ public class Client_GL {
         sY2 = sprite.getY() + sprite.getHeight();
 
         GL11.glTranslatef(point.getX() - sX2 * scale, point.getY() - sY2 * scale, 0);
-        //GL11.glRotatef(180, 0, 0, 0);
         GL11.glScalef(scale, scale, 0);
 
         GL11.glBegin(GL11.GL_TRIANGLE_STRIP);
@@ -285,6 +288,8 @@ public class Client_GL {
         GL11.glEnd();
 
         GL11.glBindTexture(ARBTextureRectangle.GL_TEXTURE_RECTANGLE_ARB, 0);
+
+        testFont.drawString(sX2, -50 + sY2, "Hello");
 
         GL11.glPopMatrix();
     }
