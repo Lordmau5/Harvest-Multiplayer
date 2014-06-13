@@ -1,6 +1,6 @@
 package com.lordmau5.harvest.objects;
 
-import com.lordmau5.harvest.environment.Point;
+import com.lordmau5.harvest.environment.Tile;
 
 /**
  * Author: Lordmau5
@@ -10,7 +10,7 @@ import com.lordmau5.harvest.environment.Point;
 public abstract class AbstractObject {
     private final String textureName;
     private final boolean isAnimated;
-    private Point position;
+    private Tile position;
 
     public AbstractObject() {
         this("", false);
@@ -19,24 +19,19 @@ public abstract class AbstractObject {
         this.textureName = textureName;
         this.isAnimated = isAnimated;
 
-        this.position = new Point();
+        this.position = new Tile(0, 0);
         ObjectRegister.addObject(this);
     }
 
     public AbstractObject(String textureName, boolean isAnimated, int x, int y) {
         this(textureName, isAnimated);
-        this.position = new Point(x, y);
-        System.out.println(position.getX() + " - " + position.getY());
+        this.position = new Tile(x, y);
     }
 
     public String getTextureName() { return textureName; }
     public boolean isAnimated() { return isAnimated; }
 
-    public void setPosition(int x, int y) {
-        position.setXY(x, y);
-    }
-
-    public Point getPosition() {
+    public Tile getPosition() {
         return position;
     }
 

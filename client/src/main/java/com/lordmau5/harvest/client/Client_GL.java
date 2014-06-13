@@ -3,7 +3,8 @@ package com.lordmau5.harvest.client;
 import com.lordmau5.harvest.client.entities.ClientPlayer;
 import com.lordmau5.harvest.client.util.texture.Sprite;
 import com.lordmau5.harvest.client.util.texture.Texture;
-import com.lordmau5.harvest.environment.Point;
+import com.lordmau5.harvest.environment.FloatPoint;
+import com.lordmau5.harvest.environment.Tile;
 import com.lordmau5.harvest.environment.World;
 import com.lordmau5.harvest.objects.AbstractObject;
 import com.lordmau5.harvest.objects.ObjectRegister;
@@ -14,9 +15,11 @@ import org.lwjgl.opengl.ARBTextureRectangle;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
+import org.newdawn.slick.Color;
 import org.newdawn.slick.TrueTypeFont;
 
 import java.awt.Font;
+import java.util.Map;
 
 /**
  * Author: Lordmau5
@@ -42,7 +45,7 @@ public class Client_GL {
     void loadImages() {
         objectTexture = new Texture("objectSheet", false);
         //texture = TextureLoader.getTexture("PNG", org.newdawn.slick.util.ResourceLoader.getResourceAsStream("textures/objects/stone.png"));
-        testFont = new TrueTypeFont(new Font("Arial", Font.PLAIN, 48), true);
+        testFont = new TrueTypeFont(new Font("Arial", Font.BOLD, 12), true);
     }
 
 
@@ -57,7 +60,7 @@ public class Client_GL {
         initGL(); // init OpenGL
         loadImages();
         world = new World();
-        player = new ClientPlayer("Lordmau5");
+        player = new ClientPlayer("Mister_my_name_is_too_long");
 
         System.out.println(objectTexture.getTexture() + " - " + player.texture.getTexture());
 
@@ -82,7 +85,7 @@ public class Client_GL {
     }
 
     public void update(int delta) {
-        Point pPos = player.getPosition();
+        FloatPoint pPos = player.getPosition();
         boolean isWalkingSomewhere = false;
         boolean shift = Keyboard.isKeyDown(Keyboard.KEY_LSHIFT);
         if(Keyboard.isKeyDown(Keyboard.KEY_UP)) { // Walk Up
@@ -98,7 +101,7 @@ public class Client_GL {
                 player.updateRunning(false);
             }
 
-            if(!world.isObjectAtPosition(pPos.getX() + modifier * delta, pPos.getY()))
+            if(!world.isObjectAtPosition((int) (pPos.getX() + modifier * delta), (int) pPos.getY()))
                 pPos.setXY(pPos.getX(), pPos.getY() - modifier * delta);
             isWalkingSomewhere = true;
         }
@@ -120,7 +123,7 @@ public class Client_GL {
                 player.updateRunning(false);
             }
 
-            if(!world.isObjectAtPosition(pPos.getX() + modifier * delta, pPos.getY()))
+            if(!world.isObjectAtPosition((int) (pPos.getX() + modifier * delta), (int) pPos.getY()))
                 pPos.setXY(pPos.getX(), pPos.getY() + modifier * delta);
             isWalkingSomewhere = true;
         }
@@ -142,7 +145,7 @@ public class Client_GL {
                 player.updateRunning(false);
             }
 
-            if(!world.isObjectAtPosition(pPos.getX() + modifier * delta, pPos.getY()))
+            if(!world.isObjectAtPosition((int) (pPos.getX() + modifier * delta), (int) pPos.getY()))
                 pPos.setXY(pPos.getX() - modifier * delta, pPos.getY());
             isWalkingSomewhere = true;
         }
@@ -164,7 +167,7 @@ public class Client_GL {
                 player.updateRunning(false);
             }
 
-            if(!world.isObjectAtPosition(pPos.getX() + modifier * delta, pPos.getY()))
+            if(!world.isObjectAtPosition((int) (pPos.getX() + modifier * delta), (int) pPos.getY()))
                 pPos.setXY(pPos.getX() + modifier * delta, pPos.getY());
         }
         else if(!isWalkingSomewhere) {
@@ -172,6 +175,9 @@ public class Client_GL {
             player.updateRunning(false);
         }
         //-------------------------------------------------
+        if(Keyboard.isKeyDown(Keyboard.KEY_R)) {
+            world.randomGenerateObjects();
+        }
 
         if (pPos.getX() < player.getProperSprite().getWidth()) pPos.setXY(player.getProperSprite().getWidth(), pPos.getY());
         if (pPos.getX() > 800) pPos.setXY(800, pPos.getY());
@@ -203,15 +209,20 @@ public class Client_GL {
     }
 
     public void initGL() {
-        GL11.glEnable(ARBTextureRectangle.GL_TEXTURE_RECTANGLE_ARB);
-        //GL11.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         GL11.glEnable(GL11.GL_TEXTURE_2D);
         GL11.glShadeModel(GL11.GL_SMOOTH);
         GL11.glDisable(GL11.GL_DEPTH_TEST);
         GL11.glDisable(GL11.GL_LIGHTING);
+
+
+        GL11.glEnable(ARBTextureRectangle.GL_TEXTURE_RECTANGLE_ARB);
+        GL11.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        GL11.glClearDepth(1);
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-        //GL11.glViewport(0, 0, 800, 600);
+
+        GL11.glViewport(0, 0, 800, 600);
+        GL11.glMatrixMode(GL11.GL_MODELVIEW);
 
         //GL11.glEnable(GL11.GL_CULL_FACE);
         //GL11.glCullFace(GL11.GL_BACK);
@@ -227,24 +238,53 @@ public class Client_GL {
     public void renderGL_Back() {
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
 
-        Point point;
         Sprite sprite;
         int sX, sY, sX2, sY2;
 
         GL11.glPushMatrix();
 
         GL11.glBindTexture(ARBTextureRectangle.GL_TEXTURE_RECTANGLE_ARB, objectTexture.getTexture());
-        for(AbstractObject object : world.getObjects()) {
-            point = object.getPosition();
-            sprite = objectTexture.getSprite(object.getTextureName());
+        for(Map.Entry<Tile, AbstractObject> entry : world.getFarmland().entrySet()) {
+            Tile point = entry.getKey();
+            sprite = objectTexture.getSprite(entry.getValue().getTextureName());
             sX = sprite.getX();
             sY = sprite.getY();
-            sX2 = sprite.getX() + sprite.getWidth();
-            sY2 = sprite.getY() + sprite.getHeight();
+            sX2 = sX + sprite.getWidth();
+            sY2 = sY + sprite.getHeight();
 
             GL11.glLoadIdentity(); // Load the Identity Matrix to reset our drawing locations
-            GL11.glTranslatef(point.getX(), point.getY(), 0);
-            GL11.glScalef(scale, scale, 0);
+            GL11.glTranslatef(point.getX() * 16 + 50, point.getY() * 16, 0);
+
+            GL11.glBegin(GL11.GL_TRIANGLE_STRIP);
+                GL11.glTexCoord2f(sX, sY);
+                GL11.glVertex2f(sX, sY);
+                GL11.glTexCoord2f(sX2, sY);
+                GL11.glVertex2f(sX2, sY);
+                GL11.glTexCoord2f(sX, sY2);
+                GL11.glVertex2f(sX, sY2);
+                GL11.glTexCoord2f(sX2, sY2);
+                GL11.glVertex2f(sX2, sY2);
+            GL11.glEnd();
+        }
+        GL11.glBindTexture(ARBTextureRectangle.GL_TEXTURE_RECTANGLE_ARB, 0);
+
+        GL11.glPopMatrix();
+
+
+
+        GL11.glPushMatrix();
+
+        GL11.glBindTexture(ARBTextureRectangle.GL_TEXTURE_RECTANGLE_ARB, objectTexture.getTexture());
+        for(Map.Entry<Tile, AbstractObject> entry : world.getObjects().entrySet()) {
+            Tile point = entry.getKey();
+            sprite = objectTexture.getSprite(entry.getValue().getTextureName());
+            sX = sprite.getX();
+            sY = sprite.getY();
+            sX2 = sX + sprite.getWidth();
+            sY2 = sY + sprite.getHeight();
+
+            GL11.glLoadIdentity(); // Load the Identity Matrix to reset our drawing locations
+            GL11.glTranslatef(point.getX() * 16, point.getY() * 16, 0);
 
             GL11.glBegin(GL11.GL_TRIANGLE_STRIP);
                 GL11.glTexCoord2f(sX, sY);
@@ -266,15 +306,14 @@ public class Client_GL {
         GL11.glPushMatrix();
 
         GL11.glBindTexture(ARBTextureRectangle.GL_TEXTURE_RECTANGLE_ARB, player.texture.getTexture());
-        point = player.getPosition();
+        FloatPoint point = player.getPosition();
         sprite = player.getProperSprite();
         sX = sprite.getX();
         sY = sprite.getY();
-        sX2 = sprite.getX() + sprite.getWidth();
-        sY2 = sprite.getY() + sprite.getHeight();
+        sX2 = sX + sprite.getWidth();
+        sY2 = sY + sprite.getHeight();
 
         GL11.glTranslatef(point.getX() - sX2 * scale, point.getY() - sY2 * scale, 0);
-        GL11.glScalef(scale, scale, 0);
 
         GL11.glBegin(GL11.GL_TRIANGLE_STRIP);
             GL11.glTexCoord2f(sX, sY);
@@ -289,7 +328,20 @@ public class Client_GL {
 
         GL11.glBindTexture(ARBTextureRectangle.GL_TEXTURE_RECTANGLE_ARB, 0);
 
-        testFont.drawString(sX2, -50 + sY2, "Hello");
+        GL11.glPopMatrix();
+
+
+
+        GL11.glPushMatrix();
+
+        GL11.glDisable(ARBTextureRectangle.GL_TEXTURE_RECTANGLE_ARB);
+        GL11.glLoadIdentity();
+
+        int minus = testFont.getWidth(player.getUsername());
+        GL11.glTranslatef(point.getX() - minus / 2 - player.getProperSprite().getWidth() / 2, point.getY(), 0);
+        testFont.drawString(0, -50, player.getUsername(), Color.white);
+
+        GL11.glEnable(ARBTextureRectangle.GL_TEXTURE_RECTANGLE_ARB);
 
         GL11.glPopMatrix();
     }

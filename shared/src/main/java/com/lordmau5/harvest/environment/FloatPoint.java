@@ -4,14 +4,14 @@ package com.lordmau5.harvest.environment;
  * @author: Lordmau5
  * @time: 11.06.2014 - 17:03
  */
-public class Point {
+public class FloatPoint {
 
     private float x, y;
 
-    public Point() {
+    public FloatPoint() {
         this(0, 0);
     }
-    public Point(float x, float y) {
+    public FloatPoint(float x, float y) {
         this.x = x;
         this.y = y;
     }
