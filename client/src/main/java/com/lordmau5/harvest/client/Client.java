@@ -1,10 +1,11 @@
 package com.lordmau5.harvest.client;
 
+import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.*;
 import org.newdawn.slick.tiled.TiledMap;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Author: Lordmau5
@@ -22,17 +23,6 @@ public class Client extends BasicGame {
     TiledMap farmLandTest;
     boolean[][] blocked = new boolean[1024][1024];
 
-    float pX = 90, pY = 90;
-    Tile playerTile = new Tile((int) Math.ceil(pX / 16), (int) Math.ceil(pY / 16));
-    enum pFacing_E {
-        UP,
-        DOWN,
-        LEFT,
-        RIGHT
-    }
-    pFacing_E pFacing = pFacing_E.DOWN;
-
-    Animation playerAnim;
     SpriteSheet facing;
 
     Animation a_up, a_down, a_left, a_right;
@@ -54,7 +44,9 @@ public class Client extends BasicGame {
     }
 
     Image grass;
-    List<int[]> grassPos = new ArrayList<>();
+    Map<Tile, Entity> grassPos = new HashMap<>();
+
+    Player player;
 
     @Override
     public void init(GameContainer container) throws SlickException {
@@ -74,123 +66,195 @@ public class Client extends BasicGame {
 
         //------------------------------------------------------
 
+        player = new Player();
+
         facing = new SpriteSheet("textures/plstand.png", 32, 32);
 
         grass = new Image("textures/grassTest.png");
 
         addGrass(8, 8);
+        addGrass(8, 9);
+        addGrass(16, 8);
+        addGrass(18, 8);
+        addGrass(14, 6);
 
-        playerAnim = new Animation(new SpriteSheet(facing.getSubImage(pFacing.ordinal() * 32, 0, 32, 32), 32, 32), 1000);
+        player.playerAnim = new Animation(new SpriteSheet(facing.getSubImage(player.pFacing.ordinal() * 32, 0, 32, 32), 32, 32), 1000);
     }
 
     void movement(GameContainer container, int delta) {
         boolean walkingSomewhere = false;
         boolean walkBlocked = false;
 
-        int oldX = playerTile.getX();
-        int oldY = playerTile.getY();
+        float oldXF = player.pX;
+        float oldYF = player.pY;
+
+        int oldX = player.playerTile.getX();
+        int oldY = player.playerTile.getY();
 
         Input input = container.getInput();
         if (input.isKeyDown(Input.KEY_UP)) { // Walk Up
-            playerAnim = a_up;
-            playerTile.updatePos(oldX, (int) Math.ceil((pY - delta * 0.1f) / 16));
-            if(!isBlocked()) {
-                pY -= delta * 0.1f;
-            }
-            else
-                walkBlocked = true;
+            player.playerAnim = a_up;
+            player.playerTile.updatePos((int) Math.floor((player.pX + 15) / 16), (int) Math.ceil((player.pY - 20 - delta * 0.1f) / 16));
+            //if(getObjectAtPosition(player.playerTile.x, player.playerTile.y) == null && !player.intersects(getObjectAtPosition(player.playerTile.x, player.playerTile.y))) {
+                if(isSurroundingOk(oldXF, oldYF, player.playerTile.x, player.playerTile.y + 1))
+                    player.pY -= delta * 0.1f;
+                else
+                    walkBlocked = true;
+            //}
+            //else
+            //    walkBlocked = true;
 
-            pFacing = pFacing_E.UP;
+            player.pFacing = PlayerFacing.UP;
 
             walkingSomewhere = true;
         }
         else if (input.isKeyDown(Input.KEY_DOWN)) {
-            playerAnim = a_down;
-            playerTile.updatePos(oldX, (int) Math.ceil((pY + delta * 0.1f) / 16));
-            if(!isBlocked()) {
-                pY += delta * 0.1f;
-            }
-            else
-                walkBlocked = true;
+            player.playerAnim = a_down;
+            player.playerTile.updatePos((int) Math.floor((player.pX + 15) / 16), (int) Math.ceil((player.pY - 20 + delta * 0.1f) / 16));
+            //if(getObjectAtPosition(player.playerTile.x, player.playerTile.y) == null && !player.intersects(getObjectAtPosition(player.playerTile.x, player.playerTile.y))) {
+                if(isSurroundingOk(oldXF, oldYF, player.playerTile.x, player.playerTile.y + 1))
+                    player.pY += delta * 0.1f;
+                else
+                    walkBlocked = true;
+            //}
+            //else
+            //    walkBlocked = true;
 
-            pFacing = pFacing_E.DOWN;
+            player.pFacing = PlayerFacing.DOWN;
 
             walkingSomewhere = true;
         }
         else if (input.isKeyDown(Input.KEY_LEFT)) {
-            playerAnim = a_left;
-            playerTile.updatePos((int) Math.ceil((pX - delta * 0.1f) / 16), oldY);
-            if(!isBlocked()) {
-                pX -= delta * 0.1f;
-            }
-            else
-                walkBlocked = true;
+            player.playerAnim = a_left;
+            player.playerTile.updatePos((int) Math.ceil((player.pX - delta * 0.1f) / 16), (int) Math.floor((player.pY + 8) / 16));
+            //if(getObjectAtPosition(player.playerTile.x, player.playerTile.y) == null && !player.intersects(getObjectAtPosition(player.playerTile.x, player.playerTile.y))) {
+                if(isSurroundingOk(oldXF, oldYF, player.playerTile.x - 1, player.playerTile.y))
+                    player.pX -= delta * 0.1f;
+                else
+                    walkBlocked = true;
+            //}
+            //else
+            //    walkBlocked = true;
 
-            pFacing = pFacing_E.LEFT;
+            player.pFacing = PlayerFacing.LEFT;
 
             walkingSomewhere = true;
         }
         else if (input.isKeyDown(Input.KEY_RIGHT)) {
-            playerAnim = a_right;
-            playerTile.updatePos((int) Math.ceil((pX + delta * 0.1f) / 16), oldY);
-            if(!isBlocked()) {
-                pX += delta * 0.1f;
-            }
-            else
-                walkBlocked = true;
+            player.playerAnim = a_right;
+            player.playerTile.updatePos((int) Math.ceil((player.pX + delta * 0.1f) / 16), (int) Math.floor((player.pY + 8) / 16));
+            //if(getObjectAtPosition(player.playerTile.x, player.playerTile.y) == null || !player.intersects(getObjectAtPosition(player.playerTile.x, player.playerTile.y))) {
+                if(isSurroundingOk(oldXF, oldYF, player.playerTile.x + 1, player.playerTile.y))
+                    player.pX += delta * 0.1f;
+                else
+                    walkBlocked = true;
+            //}
+            //else
+            //    walkBlocked = true;
 
-            pFacing = pFacing_E.RIGHT;
+            player.pFacing = PlayerFacing.RIGHT;
             walkingSomewhere = true;
         }
 
         if(!walkingSomewhere) {
-            playerAnim = new Animation(new SpriteSheet(facing.getSubImage(pFacing.ordinal() * 32, 0, 32, 32), 32, 32), 1000);
+            player.playerAnim = new Animation(new SpriteSheet(facing.getSubImage(player.pFacing.ordinal() * 32, 0, 32, 32), 32, 32), 1000);
         }
 
         if(walkBlocked)
-            playerTile.updatePos(oldX, oldY);
+            player.playerTile.updatePos(oldX, oldY);
+        setPlayerTileBasedOnPosition();
+    }
+
+    void otherActions(GameContainer container, int delta) {
+        Input input = container.getInput();
+        if(input.isKeyPressed(Keyboard.KEY_G)) {
+            Tile facingTile = player.playerFacingTile;
+            if(getObjectAtPosition(facingTile.x, facingTile.y) == null)
+                addGrass(facingTile.x, facingTile.y);
+            else
+                removeGrass(facingTile.x, facingTile.y);
+        }
     }
 
     @Override
     public void update(GameContainer container, int delta) throws SlickException {
         movement(container, delta);
+        otherActions(container, delta);
     }
 
     @Override
     public void render(GameContainer container, Graphics g) throws SlickException {
         farmLandTest.render(0, 0);
 
-        for(int[] pos : grassPos) {
-            grass.draw(pos[0] * 16, pos[1] * 16);
+        for(Map.Entry<Tile, Entity> pos : grassPos.entrySet()) {
+            //g.setColor(new Color(1f, 1f, 1f, 1f));
+            Tile tile = pos.getKey();
+            grass.draw(tile.x * 16, tile.y * 16);
+            //g.setColor(new Color(0f, 0f, 0f, 0.75f));
+            //g.draw(pos.getValue().getBoundingBox());
         }
+        g.setColor(new Color(1f, 1f, 1f, 1f));
 
-        playerAnim.draw(pX, pY);
+        player.playerAnim.draw(player.pX, player.pY);
+
+
+        g.setColor(new Color(0f, 0f, 0f, 0.75f));
+
+        //g.draw(player.getBoundingBox());
+        //g.drawRect(player.playerTile.x * 16, player.playerTile.y * 16, 16, 16);
+
+        //g.drawRect(player.playerFacingTile.x * 16, player.playerFacingTile.y * 16, 16, 16);
+    }
+
+    boolean isSurroundingOk(float oldX, float oldY, int tileX, int tileY) {
+        if (player.intersects(getObjectAtPosition(tileX, tileY))) {
+            player.updatePos(oldX, oldY);
+
+            return false;
+        }
+        if (player.intersects(getObjectAtPosition(tileX, tileY - 1))) { // Top
+            player.updatePos(player.pX, player.pY + 0.1f);
+
+            return false;
+        }
+        if (player.intersects(getObjectAtPosition(tileX, tileY + 1))) { // Bottom
+            player.updatePos(player.pX, player.pY - 0.1f);
+
+            return false;
+        }
+        if (player.intersects(getObjectAtPosition(tileX - 1, tileY))) { // Left
+            player.updatePos(player.pX + 0.1f, player.pY);
+
+            return false;
+        }
+        if (player.intersects(getObjectAtPosition(tileX + 1, tileY))) { // Right
+            player.updatePos(player.pX - 0.1f, player.pY);
+
+            return false;
+        }
+        return true;
     }
 
     void addGrass(int tX, int tY) {
-        blocked[tX][tY] = true;
-        grassPos.add(new int[] {8, 8});
+        grassPos.put(new Tile(tX, tY), new Entity("grass", 16, tX, tY));
+    }
+    void removeGrass(int tX, int tY) {
+        grassPos.remove(new Tile(tX, tY));
     }
 
-    float[] recalcPos(float x, float y) {
-        if(pFacing == pFacing_E.UP)
-            y += 6;
-        else if(pFacing == pFacing_E.DOWN)
-            y -= 6;
-        else if(pFacing == pFacing_E.LEFT)
-            x += 6;
-        else if(pFacing == pFacing_E.RIGHT)
-            x -= 6;
-        return new float[] {x, y};
+    void setPlayerTileBasedOnPosition() {
+        int x = player.playerTile.getX();
+        int y = (int) Math.ceil((player.pY + 10) / 16);
+        player.playerTile.updatePos(x, y);
+        player.updatePos(player.pX, player.pY);
     }
 
-    boolean isBlocked() {
-        int x = playerTile.getX();
-        int y = playerTile.getY();
-        if(x < 0 || y < 0)
-            return false;
-
-        System.out.println(x + " - " + y);
-        return blocked[x][y];
+    Entity getObjectAtPosition(int tX, int tY) {
+        for(Map.Entry<Tile, Entity> entry : grassPos.entrySet()) {
+            Tile tile = entry.getKey();
+            if(tX == tile.x && tY == tile.y)
+                return entry.getValue();
+        }
+        return null;
     }
 }
