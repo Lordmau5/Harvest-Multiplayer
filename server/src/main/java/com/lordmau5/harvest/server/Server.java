@@ -8,5 +8,5 @@ package com.lordmau5.harvest.server;
  * Time: 11:43
  */
 public class Server {
-    
+
 }
