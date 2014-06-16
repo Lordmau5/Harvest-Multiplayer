@@ -30,22 +30,9 @@ public class Client extends BasicGame {
     TiledMap farmLandTest;
     Rectangle outerRight = new Rectangle(32 * 16 + 1, 0, 1, 32 * 16 + 1);
     Rectangle outerBottom = new Rectangle(0, 32 * 16 + 1, 32 * 16 + 1, 1);
-    boolean[][] blocked = new boolean[1024][1024];
 
-    SpriteSheet facing;
-    SpriteSheet holding_still;
-
-    Animation a_up, a_down, a_left, a_right;
-    SpriteSheet s_up, s_down, s_left;
-
-    Animation a_r_up, a_r_down, a_r_left, a_r_right;
-    SpriteSheet s_r_up, s_r_down, s_r_left;
-
-    Animation a_h_up, a_h_down, a_h_left, a_h_right;
-    SpriteSheet h_up, h_down, h_left;
-
-    Animation a_h_r_up, a_h_r_down, a_h_r_left, a_h_r_right;
-    SpriteSheet h_r_up, h_r_down, h_r_left;
+    String[] pAnims = {"stand", "carryStill", "walkUp", "walkDown", "walkLeft", "runUp", "runDown", "runLeft", "carryUp", "carryDown", "carryLeft", "carryUpRun", "carryDownRun", "carryLeftRun"};
+    Map<String, Animation> playerAnims = new HashMap<>();
 
     public static void main(String args[]) {
         AppGameContainer game;
@@ -72,75 +59,24 @@ public class Client extends BasicGame {
     public void init(GameContainer container) throws SlickException {
         farmLandTest = new TiledMap("textures/farmland_map.tmx");
 
-        //-------------------------------------------------------
-
-        // -- Walk --
-
-        s_up = new SpriteSheet("textures/player/walk/walkUp.png", 32, 32);
-        a_up = new Animation(s_up, 250);
-
-        s_down = new SpriteSheet("textures/player/walk/walkDown.png", 32, 32);
-        a_down = new Animation(s_down, 250);
-
-        s_left = new SpriteSheet("textures/player/walk/walkSide.png", 32, 32);
-        a_left = new Animation(s_left, 250);
-        a_right = new Animation(new SpriteSheet(s_left.getFlippedCopy(true, false), 32, 32), 250);
-
-        // ----------
-
-        // -- Run  --
-
-        s_r_up = new SpriteSheet("textures/player/walk/runUp.png", 32, 32);
-        a_r_up = new Animation(s_r_up, 175);
-
-        s_r_down = new SpriteSheet("textures/player/walk/runDown.png", 32, 32);
-        a_r_down = new Animation(s_r_down, 175);
-
-        s_r_left = new SpriteSheet("textures/player/walk/runSide.png", 32, 32);
-        a_r_left = new Animation(s_r_left, 175);
-
-        a_r_right = new Animation(new SpriteSheet(s_r_left.getFlippedCopy(true, false), 32, 32), 175);
-
-        // ----------
-
-        // ----------
-
-        // -- Holding --
-
-        h_up = new SpriteSheet("textures/player/carry/carryUp.png", 32, 32);
-        a_h_up = new Animation(h_up, 250);
-
-        h_down = new SpriteSheet("textures/player/carry/carryDown.png", 32, 32);
-        a_h_down = new Animation(h_down, 250);
-
-        h_left = new SpriteSheet("textures/player/carry/carrySide.png", 32, 32);
-        a_h_left = new Animation(h_left, 250);
-
-        a_h_right = new Animation(new SpriteSheet(h_left.getFlippedCopy(true, false), 32, 32), 250);
-
-        // -------------
-
-        // -- Holding Run --
-
-        h_r_up = new SpriteSheet("textures/player/carry/carryUpRun.png", 32, 32);
-        a_h_r_up = new Animation(h_r_up, 175);
-
-        h_r_down = new SpriteSheet("textures/player/carry/carryDownRun.png", 32, 32);
-        a_h_r_down = new Animation(h_r_down, 175);
-
-        h_r_left = new SpriteSheet("textures/player/carry/carrySideRun.png", 32, 32);
-        a_h_r_left = new Animation(h_r_left, 175);
-
-        a_h_r_right = new Animation(new SpriteSheet(h_r_left.getFlippedCopy(true, false), 32, 32), 175);
-
-        // -----------------
-
-        //------------------------------------------------------
-
         player = new Player();
 
-        facing = new SpriteSheet("textures/player/walk/stand.png", 32, 32);
-        holding_still = new SpriteSheet("textures/player/carry/carryStill.png", 32, 32);
+        //-------------------------------------------------------
+        
+        SpriteSheet sheet;
+
+        for(String anim : pAnims) {
+            sheet = new SpriteSheet("textures/player/" + anim + ".png", 32, 32);
+            int repeat = 250;
+            if(anim.toLowerCase().contains("run"))
+                repeat = 175;
+
+            if(anim.contains("Left"))
+                playerAnims.put(anim.replace("Left", "Right"), new Animation(new SpriteSheet(sheet.getFlippedCopy(true, false), 32, 32), repeat));
+            playerAnims.put(anim, new Animation(sheet, repeat));
+        }
+
+        //-------------------------------------------------------
 
         objectTextures.put("grass", new Image("textures/grassTest.png"));
         objectTextures.put("bigStone", new Image("textures/bigStoneTest.png"));
@@ -154,7 +90,7 @@ public class Client extends BasicGame {
         addBigStone(4, 4);
         addBigStone(16, 16);
 
-        player.playerAnim = new Animation(new SpriteSheet(facing.getSubImage(player.pFacing.ordinal() * 32, 0, 32, 32), 32, 32), 1000);
+        player.playerAnim = new Animation(new SpriteSheet(playerAnims.get("stand").getImage(player.pFacing.ordinal()), 32, 32), 1000);
     }
 
     void movement(GameContainer container, int delta) {
@@ -175,71 +111,59 @@ public class Client extends BasicGame {
         }
 
         if (input.isKeyDown(Input.KEY_UP)) { // Walk Up
-            player.playerAnim = carrying ? (running ? a_h_r_up : a_h_up) : (running ? a_r_up : a_up);
+            player.playerAnim = carrying ? (running ? playerAnims.get("carryUpRun") : playerAnims.get("carryUp")) : (running ? playerAnims.get("runUp") : playerAnims.get("walkUp"));
             player.playerTile.updatePos((int) Math.floor((player.pX + 15) / 16), (int) Math.ceil((player.pY - 20 - delta * 0.1f) / 16));
-            //if(getObjectAtPosition(player.playerTile.x, player.playerTile.y) == null && !player.intersects(getObjectAtPosition(player.playerTile.x, player.playerTile.y))) {
-                if(isSurroundingOk() && player.pY > 0)
-                    player.pY -= delta * modifier;
-                else
-                    walkBlocked = true;
-            //}
-            //else
-            //    walkBlocked = true;
+
+            if(isSurroundingOk() && player.pY > 0)
+                player.pY -= delta * modifier;
+            else
+                walkBlocked = true;
 
             player.pFacing = PlayerFacing.UP;
 
             walkingSomewhere = true;
         }
         else if (input.isKeyDown(Input.KEY_DOWN)) {
-            player.playerAnim = carrying ? (running ? a_h_r_down : a_h_down) : (running ? a_r_down : a_down);
+            player.playerAnim = carrying ? (running ? playerAnims.get("carryDownRun") : playerAnims.get("carryDown")) : (running ? playerAnims.get("runDown") : playerAnims.get("walkDown"));
             player.playerTile.updatePos((int) Math.floor((player.pX + 15) / 16), (int) Math.ceil((player.pY - 20 + delta * 0.1f) / 16));
-            //if(getObjectAtPosition(player.playerTile.x, player.playerTile.y) == null && !player.intersects(getObjectAtPosition(player.playerTile.x, player.playerTile.y))) {
-                if(isSurroundingOk() && player.pY + player.playerAnim.getHeight() < farmLandTest.getHeight() * 16)
-                    player.pY += delta * modifier;
-                else
-                    walkBlocked = true;
-            //}
-            //else
-            //    walkBlocked = true;
+
+            if(isSurroundingOk() && player.pY + player.playerAnim.getHeight() < farmLandTest.getHeight() * 16)
+                player.pY += delta * modifier;
+            else
+                walkBlocked = true;
 
             player.pFacing = PlayerFacing.DOWN;
 
             walkingSomewhere = true;
         }
         else if (input.isKeyDown(Input.KEY_LEFT)) {
-            player.playerAnim = carrying ? (running ? a_h_r_left : a_h_left) : (running ? a_r_left : a_left);
+            player.playerAnim = carrying ? (running ? playerAnims.get("carryLeftRun") : playerAnims.get("carryLeft")) : (running ? playerAnims.get("runLeft") : playerAnims.get("walkLeft"));
             player.playerTile.updatePos((int) Math.ceil((player.pX - delta * 0.1f) / 16), (int) Math.floor((player.pY + 8) / 16));
-            //if(getObjectAtPosition(player.playerTile.x, player.playerTile.y) == null && !player.intersects(getObjectAtPosition(player.playerTile.x, player.playerTile.y))) {
-                if(isSurroundingOk() && player.pX > 0)
-                    player.pX -= delta * modifier;
-                else
-                    walkBlocked = true;
-            //}
-            //else
-            //    walkBlocked = true;
+
+            if(isSurroundingOk() && player.pX > 0)
+                player.pX -= delta * modifier;
+            else
+                walkBlocked = true;
 
             player.pFacing = PlayerFacing.LEFT;
 
             walkingSomewhere = true;
         }
         else if (input.isKeyDown(Input.KEY_RIGHT)) {
-            player.playerAnim = carrying ? (running ? a_h_r_right : a_h_right) : (running ? a_r_right : a_right);
+            player.playerAnim = carrying ? (running ? playerAnims.get("carryRightRun") : playerAnims.get("carryRight")) : (running ? playerAnims.get("runRight") : playerAnims.get("walkRight"));
             player.playerTile.updatePos((int) Math.ceil((player.pX + delta * 0.1f) / 16), (int) Math.floor((player.pY + 8) / 16));
-            //if(getObjectAtPosition(player.playerTile.x, player.playerTile.y) == null || !player.intersects(getObjectAtPosition(player.playerTile.x, player.playerTile.y))) {
-                if(isSurroundingOk() && player.pX + player.playerAnim.getWidth() < farmLandTest.getWidth() * 16)
-                    player.pX += delta * modifier;
-                else
-                    walkBlocked = true;
-            //}
-            //else
-            //    walkBlocked = true;
+
+            if(isSurroundingOk() && player.pX + player.playerAnim.getWidth() < farmLandTest.getWidth() * 16)
+                player.pX += delta * modifier;
+            else
+                walkBlocked = true;
 
             player.pFacing = PlayerFacing.RIGHT;
             walkingSomewhere = true;
         }
 
         if(!walkingSomewhere) {
-            player.playerAnim = player.holding != null ? new Animation(new Image[]{holding_still.getSubImage(player.pFacing.ordinal() * 32, 0, 32, 32)}, 1000) : new Animation(new Image[]{facing.getSubImage(player.pFacing.ordinal() * 32, 0, 32, 32)}, 1000);
+            player.playerAnim = player.holding != null ? new Animation(new Image[]{playerAnims.get("carryStill").getImage(player.pFacing.ordinal())}, 1000) : new Animation(new Image[]{playerAnims.get("stand").getImage(player.pFacing.ordinal())}, 1000);
         }
 
         if(walkBlocked)
