@@ -26,12 +26,16 @@ public class Client extends BasicGame {
     //--------------------------------------------------------
 
     TiledMap farmLandTest;
+    Rectangle outerRight = new Rectangle(32 * 16 + 1, 0, 1, 32 * 16 + 1);
+    Rectangle outerBottom = new Rectangle(0, 32 * 16 + 1, 32 * 16 + 1, 1);
     boolean[][] blocked = new boolean[1024][1024];
 
     SpriteSheet facing;
 
     Animation a_up, a_down, a_left, a_right;
     SpriteSheet s_up, s_down, s_left;
+    Animation a_r_up, a_r_down, a_r_left, a_r_right;
+    SpriteSheet s_r_up, s_r_down, s_r_left;
 
     public static void main(String args[]) {
         AppGameContainer game;
@@ -60,6 +64,8 @@ public class Client extends BasicGame {
 
         //-------------------------------------------------------
 
+        // -- Walk --
+
         s_up = new SpriteSheet("textures/plwalkup.png", 32, 32);
         a_up = new Animation(s_up, 250);
 
@@ -69,6 +75,22 @@ public class Client extends BasicGame {
         s_left = new SpriteSheet("textures/plwalkleft.png", 32, 32);
         a_left = new Animation(s_left, 250);
         a_right = new Animation(new SpriteSheet(s_left.getFlippedCopy(true, false), 32, 32), 250);
+
+        // ----------
+
+        // -- Run  --
+
+        s_r_up = new SpriteSheet("textures/plrunup.png", 32, 32);
+        a_r_up = new Animation(s_r_up, 175);
+
+        s_r_down = new SpriteSheet("textures/plrundown.png", 32, 32);
+        a_r_down = new Animation(s_r_down, 175);
+
+        s_r_left = new SpriteSheet("textures/plrunleft.png", 32, 32);
+        a_r_left = new Animation(s_r_left, 175);
+        a_r_right = new Animation(new SpriteSheet(s_r_left.getFlippedCopy(true, false), 32, 32), 175);
+
+        // ----------
 
         //------------------------------------------------------
 
@@ -101,13 +123,21 @@ public class Client extends BasicGame {
         int oldX = player.playerTile.getX();
         int oldY = player.playerTile.getY();
 
+        boolean running = false;
+        float modifier = 0.1f;
+
         Input input = container.getInput();
+        if (input.isKeyDown(Input.KEY_LSHIFT)) { // Running
+            running = true;
+            modifier = 0.2f;
+        }
+
         if (input.isKeyDown(Input.KEY_UP)) { // Walk Up
-            player.playerAnim = a_up;
+            player.playerAnim = running ? a_r_up : a_up;
             player.playerTile.updatePos((int) Math.floor((player.pX + 15) / 16), (int) Math.ceil((player.pY - 20 - delta * 0.1f) / 16));
             //if(getObjectAtPosition(player.playerTile.x, player.playerTile.y) == null && !player.intersects(getObjectAtPosition(player.playerTile.x, player.playerTile.y))) {
-                if(isSurroundingOk(oldXF, oldYF, player.playerTile.x, player.playerTile.y + 1))
-                    player.pY -= delta * 0.1f;
+                if(isSurroundingOk() && player.pY > 0)
+                    player.pY -= delta * modifier;
                 else
                     walkBlocked = true;
             //}
@@ -119,11 +149,11 @@ public class Client extends BasicGame {
             walkingSomewhere = true;
         }
         else if (input.isKeyDown(Input.KEY_DOWN)) {
-            player.playerAnim = a_down;
+            player.playerAnim = running ? a_r_down : a_down;
             player.playerTile.updatePos((int) Math.floor((player.pX + 15) / 16), (int) Math.ceil((player.pY - 20 + delta * 0.1f) / 16));
             //if(getObjectAtPosition(player.playerTile.x, player.playerTile.y) == null && !player.intersects(getObjectAtPosition(player.playerTile.x, player.playerTile.y))) {
-                if(isSurroundingOk(oldXF, oldYF, player.playerTile.x, player.playerTile.y + 1))
-                    player.pY += delta * 0.1f;
+                if(isSurroundingOk() && player.pY + player.playerAnim.getHeight() < farmLandTest.getHeight() * 16)
+                    player.pY += delta * modifier;
                 else
                     walkBlocked = true;
             //}
@@ -135,11 +165,11 @@ public class Client extends BasicGame {
             walkingSomewhere = true;
         }
         else if (input.isKeyDown(Input.KEY_LEFT)) {
-            player.playerAnim = a_left;
+            player.playerAnim = running ? a_r_left : a_left;
             player.playerTile.updatePos((int) Math.ceil((player.pX - delta * 0.1f) / 16), (int) Math.floor((player.pY + 8) / 16));
             //if(getObjectAtPosition(player.playerTile.x, player.playerTile.y) == null && !player.intersects(getObjectAtPosition(player.playerTile.x, player.playerTile.y))) {
-                if(isSurroundingOk(oldXF, oldYF, player.playerTile.x - 1, player.playerTile.y))
-                    player.pX -= delta * 0.1f;
+                if(isSurroundingOk() && player.pX > 0)
+                    player.pX -= delta * modifier;
                 else
                     walkBlocked = true;
             //}
@@ -151,11 +181,11 @@ public class Client extends BasicGame {
             walkingSomewhere = true;
         }
         else if (input.isKeyDown(Input.KEY_RIGHT)) {
-            player.playerAnim = a_right;
+            player.playerAnim = running ? a_r_right : a_right;
             player.playerTile.updatePos((int) Math.ceil((player.pX + delta * 0.1f) / 16), (int) Math.floor((player.pY + 8) / 16));
             //if(getObjectAtPosition(player.playerTile.x, player.playerTile.y) == null || !player.intersects(getObjectAtPosition(player.playerTile.x, player.playerTile.y))) {
-                if(isSurroundingOk(oldXF, oldYF, player.playerTile.x + 1, player.playerTile.y))
-                    player.pX += delta * 0.1f;
+                if(isSurroundingOk() && player.pX + player.playerAnim.getWidth() < farmLandTest.getWidth() * 16)
+                    player.pX += delta * modifier;
                 else
                     walkBlocked = true;
             //}
@@ -171,7 +201,7 @@ public class Client extends BasicGame {
         }
 
         if(walkBlocked)
-            player.playerTile.updatePos(oldX, oldY);
+            player.updatePos(oldXF, oldYF);
         setPlayerTileBasedOnPosition();
     }
 
@@ -198,7 +228,7 @@ public class Client extends BasicGame {
 
                 Entity ent = entities[random.nextInt(entities.length)].clone();
                 ent.updatePos(tX, tY);
-                if(intersectsWithAny(ent))
+                if(intersectsWithAny(ent) || ent.getBoundingBox().intersects(outerRight) || ent.getBoundingBox().intersects(outerBottom))
                     i -= 1;
                 else
                     objects.put(new Tile(tX, tY), ent);
@@ -230,13 +260,16 @@ public class Client extends BasicGame {
 
         g.setColor(new Color(0f, 0f, 0f, 0.75f));
 
-        g.draw(player.getBoundingBox());
+        /*for(Shape bBox : player.getBoundingBoxes()) {
+            g.draw(bBox);
+        }*/
         //g.drawRect(player.playerTile.x * 16, player.playerTile.y * 16, 16, 16);
 
-        //g.drawRect(player.playerFacingTile.x * 16, player.playerFacingTile.y * 16, 16, 16);
+        g.drawRect(player.playerFacingTile.x * 16 + 4, player.playerFacingTile.y * 16 + 4, 7, 7);
     }
 
-    boolean isSurroundingOk(float oldX, float oldY, int tileX, int tileY) {
+    boolean isSurroundingOk() {
+        // Check if out of the map
         int[] inter = intersectsWithAny();
         if(inter[0] == 0 && inter[1] == 0)
             return true;
@@ -254,7 +287,7 @@ public class Client extends BasicGame {
     }
 
     boolean removeObject(Tile facingTile) {
-        Rectangle faceRect = new Rectangle(facingTile.x * 16, facingTile.y * 16, 16, 16);
+        Rectangle faceRect = new Rectangle(facingTile.x * 16 + 4, facingTile.y * 16 + 4, 7, 7);
         for (Map.Entry<Tile, Entity> entry : objects.entrySet()) {
             Entity ent = entry.getValue();
             if (faceRect.intersects(ent.getBoundingBox())) {
@@ -285,7 +318,8 @@ public class Client extends BasicGame {
         for(Map.Entry<Tile, Entity> entry : objects.entrySet()) {
             Entity ent = entry.getValue();
             if(player.intersects(ent))
-                return new int[]{(int) Math.ceil(player.getBoundingBox().getCenterX() - ent.getBoundingBox().getCenterX()), (int) Math.ceil(player.getBoundingBox().getCenterY() - ent.getBoundingBox().getCenterY())};
+                return player.calculateIntersection(ent);
+                //return new int[]{(int) Math.ceil(player.getBoundingBox().getCenterX() - ent.getBoundingBox().getCenterX()), (int) Math.ceil(player.getBoundingBox().getCenterY() - ent.getBoundingBox().getCenterY())};
         }
         return new int[]{0, 0};
     }
