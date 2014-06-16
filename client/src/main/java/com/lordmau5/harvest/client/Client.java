@@ -1,11 +1,13 @@
 package com.lordmau5.harvest.client;
 
 import com.lordmau5.harvest.client.objects.Entity;
+import com.lordmau5.harvest.client.objects.IPickupable;
 import com.lordmau5.harvest.client.objects.doubleTile.BigStone;
 import com.lordmau5.harvest.client.objects.singleTile.Grass;
 import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.*;
 import org.newdawn.slick.geom.Rectangle;
+import org.newdawn.slick.geom.Shape;
 import org.newdawn.slick.tiled.TiledMap;
 
 import java.util.HashMap;
@@ -31,11 +33,19 @@ public class Client extends BasicGame {
     boolean[][] blocked = new boolean[1024][1024];
 
     SpriteSheet facing;
+    SpriteSheet holding_still;
 
     Animation a_up, a_down, a_left, a_right;
     SpriteSheet s_up, s_down, s_left;
+
     Animation a_r_up, a_r_down, a_r_left, a_r_right;
     SpriteSheet s_r_up, s_r_down, s_r_left;
+
+    Animation a_h_up, a_h_down, a_h_left, a_h_right;
+    SpriteSheet h_up, h_down, h_left;
+
+    Animation a_h_r_up, a_h_r_down, a_h_r_left, a_h_r_right;
+    SpriteSheet h_r_up, h_r_down, h_r_left;
 
     public static void main(String args[]) {
         AppGameContainer game;
@@ -66,13 +76,13 @@ public class Client extends BasicGame {
 
         // -- Walk --
 
-        s_up = new SpriteSheet("textures/plwalkup.png", 32, 32);
+        s_up = new SpriteSheet("textures/player/walk/walkUp.png", 32, 32);
         a_up = new Animation(s_up, 250);
 
-        s_down = new SpriteSheet("textures/plwalkdown.png", 32, 32);
+        s_down = new SpriteSheet("textures/player/walk/walkDown.png", 32, 32);
         a_down = new Animation(s_down, 250);
 
-        s_left = new SpriteSheet("textures/plwalkleft.png", 32, 32);
+        s_left = new SpriteSheet("textures/player/walk/walkSide.png", 32, 32);
         a_left = new Animation(s_left, 250);
         a_right = new Animation(new SpriteSheet(s_left.getFlippedCopy(true, false), 32, 32), 250);
 
@@ -80,23 +90,57 @@ public class Client extends BasicGame {
 
         // -- Run  --
 
-        s_r_up = new SpriteSheet("textures/plrunup.png", 32, 32);
+        s_r_up = new SpriteSheet("textures/player/walk/runUp.png", 32, 32);
         a_r_up = new Animation(s_r_up, 175);
 
-        s_r_down = new SpriteSheet("textures/plrundown.png", 32, 32);
+        s_r_down = new SpriteSheet("textures/player/walk/runDown.png", 32, 32);
         a_r_down = new Animation(s_r_down, 175);
 
-        s_r_left = new SpriteSheet("textures/plrunleft.png", 32, 32);
+        s_r_left = new SpriteSheet("textures/player/walk/runSide.png", 32, 32);
         a_r_left = new Animation(s_r_left, 175);
+
         a_r_right = new Animation(new SpriteSheet(s_r_left.getFlippedCopy(true, false), 32, 32), 175);
 
         // ----------
+
+        // ----------
+
+        // -- Holding --
+
+        h_up = new SpriteSheet("textures/player/carry/carryUp.png", 32, 32);
+        a_h_up = new Animation(h_up, 250);
+
+        h_down = new SpriteSheet("textures/player/carry/carryDown.png", 32, 32);
+        a_h_down = new Animation(h_down, 250);
+
+        h_left = new SpriteSheet("textures/player/carry/carrySide.png", 32, 32);
+        a_h_left = new Animation(h_left, 250);
+
+        a_h_right = new Animation(new SpriteSheet(h_left.getFlippedCopy(true, false), 32, 32), 250);
+
+        // -------------
+
+        // -- Holding Run --
+
+        h_r_up = new SpriteSheet("textures/player/carry/carryUpRun.png", 32, 32);
+        a_h_r_up = new Animation(h_r_up, 175);
+
+        h_r_down = new SpriteSheet("textures/player/carry/carryDownRun.png", 32, 32);
+        a_h_r_down = new Animation(h_r_down, 175);
+
+        h_r_left = new SpriteSheet("textures/player/carry/carrySideRun.png", 32, 32);
+        a_h_r_left = new Animation(h_r_left, 175);
+
+        a_h_r_right = new Animation(new SpriteSheet(h_r_left.getFlippedCopy(true, false), 32, 32), 175);
+
+        // -----------------
 
         //------------------------------------------------------
 
         player = new Player();
 
-        facing = new SpriteSheet("textures/plstand.png", 32, 32);
+        facing = new SpriteSheet("textures/player/walk/stand.png", 32, 32);
+        holding_still = new SpriteSheet("textures/player/carry/carryStill.png", 32, 32);
 
         objectTextures.put("grass", new Image("textures/grassTest.png"));
         objectTextures.put("bigStone", new Image("textures/bigStoneTest.png"));
@@ -121,6 +165,7 @@ public class Client extends BasicGame {
         int oldY = player.playerTile.getY();
 
         boolean running = false;
+        boolean carrying = player.holding != null;
         float modifier = 0.1f;
 
         Input input = container.getInput();
@@ -130,7 +175,7 @@ public class Client extends BasicGame {
         }
 
         if (input.isKeyDown(Input.KEY_UP)) { // Walk Up
-            player.playerAnim = running ? a_r_up : a_up;
+            player.playerAnim = carrying ? (running ? a_h_r_up : a_h_up) : (running ? a_r_up : a_up);
             player.playerTile.updatePos((int) Math.floor((player.pX + 15) / 16), (int) Math.ceil((player.pY - 20 - delta * 0.1f) / 16));
             //if(getObjectAtPosition(player.playerTile.x, player.playerTile.y) == null && !player.intersects(getObjectAtPosition(player.playerTile.x, player.playerTile.y))) {
                 if(isSurroundingOk() && player.pY > 0)
@@ -146,7 +191,7 @@ public class Client extends BasicGame {
             walkingSomewhere = true;
         }
         else if (input.isKeyDown(Input.KEY_DOWN)) {
-            player.playerAnim = running ? a_r_down : a_down;
+            player.playerAnim = carrying ? (running ? a_h_r_down : a_h_down) : (running ? a_r_down : a_down);
             player.playerTile.updatePos((int) Math.floor((player.pX + 15) / 16), (int) Math.ceil((player.pY - 20 + delta * 0.1f) / 16));
             //if(getObjectAtPosition(player.playerTile.x, player.playerTile.y) == null && !player.intersects(getObjectAtPosition(player.playerTile.x, player.playerTile.y))) {
                 if(isSurroundingOk() && player.pY + player.playerAnim.getHeight() < farmLandTest.getHeight() * 16)
@@ -162,7 +207,7 @@ public class Client extends BasicGame {
             walkingSomewhere = true;
         }
         else if (input.isKeyDown(Input.KEY_LEFT)) {
-            player.playerAnim = running ? a_r_left : a_left;
+            player.playerAnim = carrying ? (running ? a_h_r_left : a_h_left) : (running ? a_r_left : a_left);
             player.playerTile.updatePos((int) Math.ceil((player.pX - delta * 0.1f) / 16), (int) Math.floor((player.pY + 8) / 16));
             //if(getObjectAtPosition(player.playerTile.x, player.playerTile.y) == null && !player.intersects(getObjectAtPosition(player.playerTile.x, player.playerTile.y))) {
                 if(isSurroundingOk() && player.pX > 0)
@@ -178,7 +223,7 @@ public class Client extends BasicGame {
             walkingSomewhere = true;
         }
         else if (input.isKeyDown(Input.KEY_RIGHT)) {
-            player.playerAnim = running ? a_r_right : a_right;
+            player.playerAnim = carrying ? (running ? a_h_r_right : a_h_right) : (running ? a_r_right : a_right);
             player.playerTile.updatePos((int) Math.ceil((player.pX + delta * 0.1f) / 16), (int) Math.floor((player.pY + 8) / 16));
             //if(getObjectAtPosition(player.playerTile.x, player.playerTile.y) == null || !player.intersects(getObjectAtPosition(player.playerTile.x, player.playerTile.y))) {
                 if(isSurroundingOk() && player.pX + player.playerAnim.getWidth() < farmLandTest.getWidth() * 16)
@@ -194,7 +239,7 @@ public class Client extends BasicGame {
         }
 
         if(!walkingSomewhere) {
-            player.playerAnim = new Animation(new SpriteSheet(facing.getSubImage(player.pFacing.ordinal() * 32, 0, 32, 32), 32, 32), 1000);
+            player.playerAnim = player.holding != null ? new Animation(new Image[]{holding_still.getSubImage(player.pFacing.ordinal() * 32, 0, 32, 32)}, 1000) : new Animation(new Image[]{facing.getSubImage(player.pFacing.ordinal() * 32, 0, 32, 32)}, 1000);
         }
 
         if(walkBlocked)
@@ -231,6 +276,23 @@ public class Client extends BasicGame {
                     objects.put(new Tile(tX, tY), ent);
             }
         }
+        if(input.isKeyPressed(Keyboard.KEY_C)) { // Pickup items | Temporary
+            if(player.holding != null) {
+                if(isEntityInRectangle(new Rectangle(player.playerFacingTile.x * 16 + 4, player.playerFacingTile.y * 16 + 4, 7, 7)))
+                    return;
+
+                addGrass(player.playerFacingTile.x, player.playerFacingTile.y);
+                player.holding = null;
+                return;
+            }
+
+            Entity ent = getObjectAtPosition(player.playerFacingTile.x, player.playerFacingTile.y);
+            if(ent == null || !(ent instanceof IPickupable))
+                return;
+
+            removeObject(player.playerFacingTile);
+            player.holding = ent;
+        }
     }
 
     @Override
@@ -247,8 +309,8 @@ public class Client extends BasicGame {
             g.setColor(new Color(1f, 1f, 1f, 1f));
             Tile tile = pos.getKey();
             objectTextures.get(pos.getValue().texture).draw(tile.x * 16, tile.y * 16);
-            g.setColor(new Color(0f, 0f, 0f, 0.75f));
-            g.draw(pos.getValue().getBoundingBox());
+            //g.setColor(new Color(0f, 0f, 0f, 0.75f));
+            //g.draw(pos.getValue().getBoundingBox());
         }
         g.setColor(new Color(1f, 1f, 1f, 1f));
 
@@ -262,7 +324,11 @@ public class Client extends BasicGame {
         }*/
         //g.drawRect(player.playerTile.x * 16, player.playerTile.y * 16, 16, 16);
 
-        g.drawRect(player.playerFacingTile.x * 16 + 4, player.playerFacingTile.y * 16 + 4, 7, 7);
+        g.drawRect(player.playerFacingTile.x * 16, player.playerFacingTile.y * 16, 15, 15);
+
+        if(player.holding != null) {
+            objectTextures.get(player.holding.texture).draw(player.pX + player.holding.spriteSize / 2, player.pY - player.holding.spriteSize / 2);
+        }
     }
 
     boolean isSurroundingOk() {
@@ -296,7 +362,7 @@ public class Client extends BasicGame {
     }
 
     void setPlayerTileBasedOnPosition() {
-        int x = player.playerTile.getX();
+        int x = (int) Math.ceil(player.pX / 16);
         int y = (int) Math.ceil((player.pY + 10) / 16);
         player.playerTile.updatePos(x, y);
         player.updatePos(player.pX, player.pY);
@@ -328,5 +394,12 @@ public class Client extends BasicGame {
                 return entry.getValue();
         }
         return null;
+    }
+
+    boolean isEntityInRectangle(Shape shape) {
+        for(Map.Entry<Tile, Entity> entry : objects.entrySet())
+            if(entry.getValue().getBoundingBox().intersects(shape))
+                return true;
+        return false;
     }
 }

@@ -19,6 +19,8 @@ public class Player {
 
     public Animation playerAnim;
 
+    public Entity holding;
+
     private final Shape[] boundingBox;
 
     public Player() {
@@ -28,14 +30,6 @@ public class Player {
 
         boundingBox[PlayerBoundaries.BOTTOM_LEFT.ordinal()] = new Rectangle(pX + 11, pY + 24, 6, 6);
         boundingBox[PlayerBoundaries.BOTTOM_RIGHT.ordinal()] = new Rectangle(pX + 17, pY + 24, 6, 6);
-    }
-
-    /*public Shape getBoundingBox() {
-        return this.boundingBox;
-    }*/
-
-    public Shape[] getBoundingBoxes() {
-        return this.boundingBox;
     }
 
     public void updatePos(float x, float y) {

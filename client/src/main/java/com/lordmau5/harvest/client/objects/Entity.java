@@ -13,7 +13,7 @@ public class Entity {
     public final String texture;
     private Shape boundingBox;
     public Tile tile;
-    private int spriteSize;
+    public int spriteSize;
 
     public Entity(String texture, int spriteSize, int xTile, int yTile) {
         this.spriteSize = spriteSize;
