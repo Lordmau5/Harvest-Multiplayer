@@ -1,5 +1,6 @@
 package com.lordmau5.harvest.client;
 
+import com.lordmau5.harvest.client.floor.Farmland;
 import com.lordmau5.harvest.client.objects.Entity;
 import com.lordmau5.harvest.client.objects.IPickupable;
 import com.lordmau5.harvest.client.objects.doubleTile.BigStone;
@@ -8,7 +9,6 @@ import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.*;
 import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.geom.Shape;
-import org.newdawn.slick.tiled.TiledMap;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,12 +27,19 @@ public class Client extends BasicGame {
 
     //--------------------------------------------------------
 
-    TiledMap farmLandTest;
+    //TiledMap farmLandTest;
     Rectangle outerRight = new Rectangle(32 * 16 + 1, 0, 1, 32 * 16 + 1);
     Rectangle outerBottom = new Rectangle(0, 32 * 16 + 1, 32 * 16 + 1, 1);
 
     String[] pAnims = {"stand", "carryStill", "walkUp", "walkDown", "walkLeft", "runUp", "runDown", "runLeft", "carryUp", "carryDown", "carryLeft", "carryUpRun", "carryDownRun", "carryLeftRun"};
     Map<String, Animation> playerAnims = new HashMap<>();
+
+    String[] farmLandNames = {"normal", "tilled", "watered"};
+    Map<String, Image> farmLandImages = new HashMap<>();
+
+    int farmWidth = 32;
+    int farmHeight = 32;
+    Map<Tile, Farmland> farmLand = new HashMap<>();
 
     public static void main(String args[]) {
         AppGameContainer game;
@@ -57,12 +64,22 @@ public class Client extends BasicGame {
 
     @Override
     public void init(GameContainer container) throws SlickException {
-        farmLandTest = new TiledMap("textures/farmland_map.tmx");
+        //farmLandTest = new TiledMap("textures/farmland_map.tmx");
+
+        for(String fland : farmLandNames) {
+            farmLandImages.put(fland, new Image("textures/farmland/" + fland + ".png"));
+        }
+
+        for(int x=0; x<farmWidth; x++) {
+            for(int y=0; y<farmHeight; y++) {
+                farmLand.put(new Tile(x, y), new Farmland(x, y));
+            }
+        }
 
         player = new Player();
 
         //-------------------------------------------------------
-        
+
         SpriteSheet sheet;
 
         for(String anim : pAnims) {
@@ -127,7 +144,7 @@ public class Client extends BasicGame {
             player.playerAnim = carrying ? (running ? playerAnims.get("carryDownRun") : playerAnims.get("carryDown")) : (running ? playerAnims.get("runDown") : playerAnims.get("walkDown"));
             player.playerTile.updatePos((int) Math.floor((player.pX + 15) / 16), (int) Math.ceil((player.pY - 20 + delta * 0.1f) / 16));
 
-            if(isSurroundingOk() && player.pY + player.playerAnim.getHeight() < farmLandTest.getHeight() * 16)
+            if(isSurroundingOk() && player.pY + player.playerAnim.getHeight() < farmHeight * 16)
                 player.pY += delta * modifier;
             else
                 walkBlocked = true;
@@ -153,7 +170,7 @@ public class Client extends BasicGame {
             player.playerAnim = carrying ? (running ? playerAnims.get("carryRightRun") : playerAnims.get("carryRight")) : (running ? playerAnims.get("runRight") : playerAnims.get("walkRight"));
             player.playerTile.updatePos((int) Math.ceil((player.pX + delta * 0.1f) / 16), (int) Math.floor((player.pY + 8) / 16));
 
-            if(isSurroundingOk() && player.pX + player.playerAnim.getWidth() < farmLandTest.getWidth() * 16)
+            if(isSurroundingOk() && player.pX + player.playerAnim.getWidth() < farmWidth * 16)
                 player.pX += delta * modifier;
             else
                 walkBlocked = true;
@@ -171,7 +188,7 @@ public class Client extends BasicGame {
         setPlayerTileBasedOnPosition();
     }
 
-    void otherActions(GameContainer container, int delta) {
+    void otherActions(GameContainer container) {
         Input input = container.getInput();
         if(input.isKeyPressed(Keyboard.KEY_G)) {
             Tile facingTile = player.playerFacingTile;
@@ -194,10 +211,13 @@ public class Client extends BasicGame {
 
                 Entity ent = entities[random.nextInt(entities.length)].clone();
                 ent.updatePos(tX, tY);
+
                 if(intersectsWithAny(ent) || ent.getBoundingBox().intersects(outerRight) || ent.getBoundingBox().intersects(outerBottom))
                     i -= 1;
-                else
+                else {
+                    fixFarmlands(ent.getBoundingBox());
                     objects.put(new Tile(tX, tY), ent);
+                }
             }
         }
         if(input.isKeyPressed(Keyboard.KEY_C)) { // Pickup items | Temporary
@@ -217,20 +237,44 @@ public class Client extends BasicGame {
             removeObject(player.playerFacingTile);
             player.holding = ent;
         }
+        if(input.isKeyPressed(Keyboard.KEY_B)) { // Till / Un-Till Farmland
+            Entity ent = getObjectAtPosition(player.playerFacingTile.x, player.playerFacingTile.y);
+            if(ent != null)
+                return;
+
+            Farmland land = farmLand.get(player.playerFacingTile);
+
+            land.setTilled(!land.isTilled());
+        }
+        if(input.isKeyPressed(Keyboard.KEY_N)) { // Water / Un-Water Farmland
+            Entity ent = getObjectAtPosition(player.playerFacingTile.x, player.playerFacingTile.y);
+            if(ent != null)
+                return;
+
+            Farmland land = farmLand.get(player.playerFacingTile);
+            if(!land.isTilled())
+                return;
+
+            land.setWatered(!land.isWatered());
+        }
     }
 
     @Override
     public void update(GameContainer container, int delta) throws SlickException {
         movement(container, delta);
-        otherActions(container, delta);
+        otherActions(container);
     }
 
     @Override
     public void render(GameContainer container, Graphics g) throws SlickException {
-        farmLandTest.render(0, 0);
+        for(Map.Entry<Tile, Farmland> pos : farmLand.entrySet()) {
+            Tile tile = pos.getKey();
+            Farmland land = pos.getValue();
+            farmLandImages.get(land.isWatered() ? "watered" : (land.isTilled() ? "tilled" : "normal")).draw(tile.x * 16, tile.y * 16);
+        }
 
         for(Map.Entry<Tile, Entity> pos : objects.entrySet()) {
-            g.setColor(new Color(1f, 1f, 1f, 1f));
+            //g.setColor(new Color(1f, 1f, 1f, 1f));
             Tile tile = pos.getKey();
             objectTextures.get(pos.getValue().texture).draw(tile.x * 16, tile.y * 16);
             //g.setColor(new Color(0f, 0f, 0f, 0.75f));
@@ -325,5 +369,16 @@ public class Client extends BasicGame {
             if(entry.getValue().getBoundingBox().intersects(shape))
                 return true;
         return false;
+    }
+
+    void fixFarmlands(Shape shape) {
+        Rectangle landRect = new Rectangle(0, 0, 8, 8);
+        for(Map.Entry<Tile, Farmland> entry : farmLand.entrySet()) {
+            Farmland land = entry.getValue();
+            Tile tile = entry.getKey();
+            landRect.setLocation(tile.x * 16 + 4, tile.y * 16 + 4);
+            if(landRect.intersects(shape))
+                land.setTilled(false);
+        }
     }
 }
