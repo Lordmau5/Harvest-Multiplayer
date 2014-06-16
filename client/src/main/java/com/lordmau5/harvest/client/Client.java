@@ -1,11 +1,16 @@
 package com.lordmau5.harvest.client;
 
+import com.lordmau5.harvest.client.objects.Entity;
+import com.lordmau5.harvest.client.objects.doubleTile.BigStone;
+import com.lordmau5.harvest.client.objects.singleTile.Grass;
 import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.*;
+import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.tiled.TiledMap;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 /**
  * Author: Lordmau5
@@ -43,8 +48,9 @@ public class Client extends BasicGame {
 
     }
 
-    Image grass;
-    Map<Tile, Entity> grassPos = new HashMap<>();
+    Entity[] entities = new Entity[] {new Grass(), new BigStone()};
+    Map<String, Image> objectTextures = new HashMap<>();
+    Map<Tile, Entity> objects = new HashMap<>();
 
     Player player;
 
@@ -70,13 +76,17 @@ public class Client extends BasicGame {
 
         facing = new SpriteSheet("textures/plstand.png", 32, 32);
 
-        grass = new Image("textures/grassTest.png");
+        objectTextures.put("grass", new Image("textures/grassTest.png"));
+        objectTextures.put("bigStone", new Image("textures/bigStoneTest.png"));
 
         addGrass(8, 8);
         addGrass(8, 9);
         addGrass(16, 8);
         addGrass(18, 8);
         addGrass(14, 6);
+
+        addBigStone(4, 4);
+        addBigStone(16, 16);
 
         player.playerAnim = new Animation(new SpriteSheet(facing.getSubImage(player.pFacing.ordinal() * 32, 0, 32, 32), 32, 32), 1000);
     }
@@ -169,10 +179,30 @@ public class Client extends BasicGame {
         Input input = container.getInput();
         if(input.isKeyPressed(Keyboard.KEY_G)) {
             Tile facingTile = player.playerFacingTile;
-            if(getObjectAtPosition(facingTile.x, facingTile.y) == null)
+            if(!removeObject(facingTile))
                 addGrass(facingTile.x, facingTile.y);
-            else
-                removeGrass(facingTile.x, facingTile.y);
+        }
+        if(input.isKeyPressed(Keyboard.KEY_R)) { // Random Objects
+            objects.clear();
+
+            Random random = new Random();
+            for(int i=0; i<32; i++) {
+                int tX = random.nextInt(32);
+                int tY = random.nextInt(32);
+
+                if(getObjectAtPosition(tX, tY) != null)
+                    while(getObjectAtPosition(tX, tY) != null) {
+                        tX = random.nextInt(32);
+                        tY = random.nextInt(32);
+                    }
+
+                Entity ent = entities[random.nextInt(entities.length)].clone();
+                ent.updatePos(tX, tY);
+                if(intersectsWithAny(ent))
+                    i -= 1;
+                else
+                    objects.put(new Tile(tX, tY), ent);
+            }
         }
     }
 
@@ -186,12 +216,12 @@ public class Client extends BasicGame {
     public void render(GameContainer container, Graphics g) throws SlickException {
         farmLandTest.render(0, 0);
 
-        for(Map.Entry<Tile, Entity> pos : grassPos.entrySet()) {
-            //g.setColor(new Color(1f, 1f, 1f, 1f));
+        for(Map.Entry<Tile, Entity> pos : objects.entrySet()) {
+            g.setColor(new Color(1f, 1f, 1f, 1f));
             Tile tile = pos.getKey();
-            grass.draw(tile.x * 16, tile.y * 16);
-            //g.setColor(new Color(0f, 0f, 0f, 0.75f));
-            //g.draw(pos.getValue().getBoundingBox());
+            objectTextures.get(pos.getValue().texture).draw(tile.x * 16, tile.y * 16);
+            g.setColor(new Color(0f, 0f, 0f, 0.75f));
+            g.draw(pos.getValue().getBoundingBox());
         }
         g.setColor(new Color(1f, 1f, 1f, 1f));
 
@@ -200,46 +230,39 @@ public class Client extends BasicGame {
 
         g.setColor(new Color(0f, 0f, 0f, 0.75f));
 
-        //g.draw(player.getBoundingBox());
+        g.draw(player.getBoundingBox());
         //g.drawRect(player.playerTile.x * 16, player.playerTile.y * 16, 16, 16);
 
         //g.drawRect(player.playerFacingTile.x * 16, player.playerFacingTile.y * 16, 16, 16);
     }
 
     boolean isSurroundingOk(float oldX, float oldY, int tileX, int tileY) {
-        if (player.intersects(getObjectAtPosition(tileX, tileY))) {
-            player.updatePos(oldX, oldY);
+        int[] inter = intersectsWithAny();
+        if(inter[0] == 0 && inter[1] == 0)
+            return true;
 
-            return false;
-        }
-        if (player.intersects(getObjectAtPosition(tileX, tileY - 1))) { // Top
-            player.updatePos(player.pX, player.pY + 0.1f);
-
-            return false;
-        }
-        if (player.intersects(getObjectAtPosition(tileX, tileY + 1))) { // Bottom
-            player.updatePos(player.pX, player.pY - 0.1f);
-
-            return false;
-        }
-        if (player.intersects(getObjectAtPosition(tileX - 1, tileY))) { // Left
-            player.updatePos(player.pX + 0.1f, player.pY);
-
-            return false;
-        }
-        if (player.intersects(getObjectAtPosition(tileX + 1, tileY))) { // Right
-            player.updatePos(player.pX - 0.1f, player.pY);
-
-            return false;
-        }
-        return true;
+        player.updatePos(player.pX + inter[0] * 0.1f, player.pY + inter[1] * 0.1f);
+        return false;
     }
 
     void addGrass(int tX, int tY) {
-        grassPos.put(new Tile(tX, tY), new Entity("grass", 16, tX, tY));
+        objects.put(new Tile(tX, tY), new Grass(tX, tY));
     }
-    void removeGrass(int tX, int tY) {
-        grassPos.remove(new Tile(tX, tY));
+
+    void addBigStone(int tX, int tY) {
+        objects.put(new Tile(tX, tY), new BigStone(tX, tY));
+    }
+
+    boolean removeObject(Tile facingTile) {
+        Rectangle faceRect = new Rectangle(facingTile.x * 16, facingTile.y * 16, 16, 16);
+        for (Map.Entry<Tile, Entity> entry : objects.entrySet()) {
+            Entity ent = entry.getValue();
+            if (faceRect.intersects(ent.getBoundingBox())) {
+                objects.remove(entry.getKey());
+                return true;
+            }
+        }
+        return false;
     }
 
     void setPlayerTileBasedOnPosition() {
@@ -249,8 +272,26 @@ public class Client extends BasicGame {
         player.updatePos(player.pX, player.pY);
     }
 
+    boolean intersectsWithAny(Entity toCheck) {
+        for(Map.Entry<Tile, Entity> entry : objects.entrySet()) {
+            Entity ent = entry.getValue();
+            if(toCheck.getBoundingBox().intersects(ent.getBoundingBox()))
+                return true;
+        }
+        return false;
+    }
+
+    int[] intersectsWithAny() {
+        for(Map.Entry<Tile, Entity> entry : objects.entrySet()) {
+            Entity ent = entry.getValue();
+            if(player.intersects(ent))
+                return new int[]{(int) Math.ceil(player.getBoundingBox().getCenterX() - ent.getBoundingBox().getCenterX()), (int) Math.ceil(player.getBoundingBox().getCenterY() - ent.getBoundingBox().getCenterY())};
+        }
+        return new int[]{0, 0};
+    }
+
     Entity getObjectAtPosition(int tX, int tY) {
-        for(Map.Entry<Tile, Entity> entry : grassPos.entrySet()) {
+        for(Map.Entry<Tile, Entity> entry : objects.entrySet()) {
             Tile tile = entry.getKey();
             if(tX == tile.x && tY == tile.y)
                 return entry.getValue();

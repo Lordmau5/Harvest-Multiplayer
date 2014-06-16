@@ -1,5 +1,6 @@
 package com.lordmau5.harvest.client;
 
+import com.lordmau5.harvest.client.objects.Entity;
 import org.newdawn.slick.Animation;
 import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.geom.Shape;
