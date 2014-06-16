@@ -117,9 +117,6 @@ public class Client extends BasicGame {
         boolean walkingSomewhere = false;
         boolean walkBlocked = false;
 
-        float oldXF = player.pX;
-        float oldYF = player.pY;
-
         int oldX = player.playerTile.getX();
         int oldY = player.playerTile.getY();
 
@@ -201,7 +198,7 @@ public class Client extends BasicGame {
         }
 
         if(walkBlocked)
-            player.updatePos(oldXF, oldYF);
+            player.playerTile.updatePos(oldX, oldY);
         setPlayerTileBasedOnPosition();
     }
 
