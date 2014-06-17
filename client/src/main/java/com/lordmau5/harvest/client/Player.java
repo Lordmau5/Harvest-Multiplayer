@@ -1,5 +1,6 @@
 package com.lordmau5.harvest.client;
 
+import com.lordmau5.harvest.client.items.IUseable;
 import com.lordmau5.harvest.client.objects.Entity;
 import com.lordmau5.harvest.client.objects.PlayerBoundaries;
 import org.newdawn.slick.Animation;
@@ -20,6 +21,7 @@ public class Player {
     public Animation playerAnim;
 
     public Entity holding;
+    public IUseable useable;
 
     private final Shape[] boundingBox;
 
@@ -60,6 +62,14 @@ public class Player {
         }
     }
 
+    public boolean intersects(Shape shape) {
+        for(Shape bBox : this.boundingBox)
+            if(bBox.intersects(shape))
+                return true;
+
+        return false;
+    }
+
     public boolean intersects(Entity ent) {
         for(Shape bBox : this.boundingBox)
             if(bBox.intersects(ent.getBoundingBox()))
@@ -68,15 +78,15 @@ public class Player {
         return false;
     }
 
-    public int[] calculateIntersection(Entity ent) {
+    public int[] calculateIntersection(Shape bBox) {
         int[] ret = {0, 0};
 
         boolean[] inters = new boolean[4];
 
-        inters[0] = boundingBox[PlayerBoundaries.TOP_LEFT.ordinal()].intersects(ent.getBoundingBox());
-        inters[1] = boundingBox[PlayerBoundaries.TOP_RIGHT.ordinal()].intersects(ent.getBoundingBox());
-        inters[2] = boundingBox[PlayerBoundaries.BOTTOM_LEFT.ordinal()].intersects(ent.getBoundingBox());
-        inters[3] = boundingBox[PlayerBoundaries.BOTTOM_RIGHT.ordinal()].intersects(ent.getBoundingBox());
+        inters[0] = boundingBox[PlayerBoundaries.TOP_LEFT.ordinal()].intersects(bBox);
+        inters[1] = boundingBox[PlayerBoundaries.TOP_RIGHT.ordinal()].intersects(bBox);
+        inters[2] = boundingBox[PlayerBoundaries.BOTTOM_LEFT.ordinal()].intersects(bBox);
+        inters[3] = boundingBox[PlayerBoundaries.BOTTOM_RIGHT.ordinal()].intersects(bBox);
 
         if (inters[0]) {
             if(pFacing == PlayerFacing.LEFT && !inters[1])
