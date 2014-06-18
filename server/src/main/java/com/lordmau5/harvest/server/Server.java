@@ -4,6 +4,7 @@ package com.lordmau5.harvest.server;
 
 import com.lordmau5.harvest.server.network.ClientConnection;
 import com.lordmau5.harvest.server.network.NetworkServer;
+import com.lordmau5.harvest.shared.World;
 
 /**
  * Author: Lordmau5
@@ -12,8 +13,12 @@ import com.lordmau5.harvest.server.network.NetworkServer;
  */
 public class Server {
 
+    public static World world;
+
     public static void main(String[] args) {
         Runtime.getRuntime().addShutdownHook(new Shutdown());
+
+        world = new World();
 
         NetworkServer.start("localhost", 8075);
     }

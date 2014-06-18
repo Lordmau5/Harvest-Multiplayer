@@ -1,6 +1,7 @@
 package com.lordmau5.harvest.server.network;
 
 import com.lordmau5.harvest.shared.network.packet.playercon.PacketPlayerJoin;
+import com.lordmau5.harvest.shared.network.packet.playercon.PacketPlayerLeave;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
@@ -38,7 +39,6 @@ public class NetworkServer {
     }
 
     public static void onConnectionOpened(ClientConnection connection) {
-        System.out.println(connections.size());
         for(ClientConnection con : connections) {
             con.channel().writeAndFlush(new PacketPlayerJoin(connection.username()));
         }
@@ -48,6 +48,9 @@ public class NetworkServer {
 
     public static void onConnectionClosed(ClientConnection connection) {
         connections.remove(connection);
+        for(ClientConnection con : connections) {
+            con.channel().writeAndFlush(new PacketPlayerLeave(connection.username()));
+        }
         System.out.println("Player " + connection.username() + " logged out!");
     }
 }

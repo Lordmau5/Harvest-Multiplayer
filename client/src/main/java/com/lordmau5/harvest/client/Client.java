@@ -10,6 +10,7 @@ import com.lordmau5.harvest.shared.farmable.seeds.ISeeds;
 import com.lordmau5.harvest.shared.farmable.seeds.TomatoSeeds;
 import com.lordmau5.harvest.shared.farmable.seeds.TurnipSeeds;
 import com.lordmau5.harvest.shared.floor.Farmland;
+import com.lordmau5.harvest.shared.network.packet.player.PacketPlayerMovement;
 import com.lordmau5.harvest.shared.objects.Entity;
 import com.lordmau5.harvest.shared.objects.doubleTile.BigStone;
 import com.lordmau5.harvest.shared.objects.singleTile.Grass;
@@ -27,6 +28,8 @@ import java.util.*;
  * Time: 11:43
  */
 public class Client extends BasicGame {
+
+    public static Client instance;
 
     static int width = 800;
     static int height = 600;
@@ -83,8 +86,39 @@ public class Client extends BasicGame {
 
     Entity[] entities = new Entity[] {new Grass(), new BigStone()};
     Map<String, Image> objectTextures = new HashMap<>();
-    List<Player> otherPlayers = new ArrayList<>();
-    //Map<Tile, ICrop> crops = new HashMap<>();
+    Map<String, Player> players = new HashMap<>();
+    List<Player> aPlayers = new ArrayList<>();
+
+    public void playerJoin(String username) {
+        if(!players.containsKey(username)) {
+            Player player = new Player(username);
+            player.setWorld(this.player.getWorld());
+            players.put(username, player);
+            aPlayers.add(player);
+        }
+    }
+
+    public void playerLeave(String username) {
+        if(players.containsKey(username)) {
+            players.remove(username);
+
+            for(Player player : aPlayers)
+                if(player.getUsername().equals(username)) {
+                    aPlayers.remove(player);
+                    return;
+                }
+        }
+    }
+
+    public Player getPlayer(String username) {
+        if(!players.containsKey(username))
+            return null;
+        return players.get(username);
+    }
+
+    public Player getLocalPlayer() {
+        return player;
+    }
 
     public static String getPlayerName() {
         return playerName;
@@ -92,6 +126,10 @@ public class Client extends BasicGame {
 
     @Override
     public void init(GameContainer container) throws SlickException {
+        instance = this;
+
+        //-----------
+
         for(String fland : farmLandNames) {
             farmLandImages.put(fland, ImageLoader.loadImage("textures/farmland/" + fland + ".png"));
         }
@@ -103,9 +141,6 @@ public class Client extends BasicGame {
             String seedName = entry.getKey();
             farmableImages.put(seedName, ImageLoader.loadImage("textures/farmables/" + seedName + ".png"));
         }
-
-        player = new Player(playerName);
-        player.setWorld(new World());
 
         //-------------------------------------------------------
 
@@ -136,7 +171,10 @@ public class Client extends BasicGame {
         addBigStone(4, 4);
         addBigStone(16, 16);*/
 
-        player.playerAnim = new Animation(new SpriteSheet(Player.playerAnims.get("stand").getImage(player.pFacing.ordinal()), 32, 32), 1000);
+        player = new Player(playerName);
+        players.put(playerName, player);
+        aPlayers.add(player);
+        player.setWorld(new World());
     }
 
     void movement(GameContainer container, int delta) {
@@ -171,11 +209,15 @@ public class Client extends BasicGame {
 
         if(!walkingSomewhere) {
             player.playerAnim = player.holding != null ? new Animation(new Image[]{Player.playerAnims.get("carryStill").getImage(player.pFacing.ordinal())}, 1000) : new Animation(new Image[]{Player.playerAnims.get("stand").getImage(player.pFacing.ordinal())}, 1000);
+            NetworkHandler.sendPacket(new PacketPlayerMovement(player, false));
         }
 
         if(walkBlocked)
             player.playerTile.updatePos(oldX, oldY);
-        player.setPlayerTileBasedOnPosition();
+        else {
+            player.updatePos(player.pX, player.pY);
+            NetworkHandler.sendPacket(new PacketPlayerMovement(player, running));
+        }
     }
 
     void otherActions(GameContainer container) {
@@ -243,6 +285,15 @@ public class Client extends BasicGame {
         otherActions(container);
     }
 
+    private void reArrangePlayers() {
+        Collections.sort(aPlayers, new Comparator<Player>() {
+            @Override
+            public int compare(Player p1, Player p2) {
+                return p1.pY >= p2.pY ? 1 : -1;
+            }
+        });
+    }
+
     @Override
     public void render(GameContainer container, Graphics g) throws SlickException {
         g.translate(width / 2 - player.pX, height / 2 - player.pY);
@@ -270,27 +321,28 @@ public class Client extends BasicGame {
             Tile tile = pos.getKey();
             objectTextures.get(pos.getValue().texture).draw(tile.getX() * 16, tile.getY() * 16);
         }
-        g.setColor(new Color(1f, 1f, 1f, 1f));
-
-        player.playerAnim.draw(player.pX, player.pY);
-
-
         g.setColor(new Color(0f, 0f, 0f, 0.75f));
 
         g.drawRect(player.playerFacingTile.getX() * 16, player.playerFacingTile.getY() * 16, 15, 15);
 
-        if(player.holding != null) {
-            objectTextures.get(player.holding.texture).draw(player.pX + player.holding.spriteSize / 2, player.pY - player.holding.spriteSize / 2);
+        reArrangePlayers();
+        for(Player player : aPlayers) {
+            g.setColor(new Color(1f, 1f, 1f, 1f));
+            player.playerAnim.draw(player.pX, player.pY);
+
+            if(player.holding != null) {
+                objectTextures.get(player.holding.texture).draw(player.pX + player.holding.spriteSize / 2, player.pY - player.holding.spriteSize / 2);
+            }
+
+            g.setColor(new Color(0f, 0f, 0f, 0.5f));
+
+            String username = player.getUsername();
+            int usernameWidth = g.getFont().getWidth(username);
+            Image sprite = player.playerAnim.getCurrentFrame();
+            g.fillRect(player.pX - usernameWidth / 2 + sprite.getWidth() / 2 - 4, player.pY - 25, usernameWidth + 8, 22);
+            g.setColor(new Color(1f, 1f, 1f, 1f));
+            g.drawString(username.replace("_", " "), player.pX - usernameWidth / 2 + sprite.getWidth() / 2, player.pY - 25);
         }
-
-        g.setColor(new Color(0f, 0f, 0f, 0.5f));
-
-        String username = player.getUsername();
-        int usernameWidth = g.getFont().getWidth(username);
-        Image sprite = player.playerAnim.getCurrentFrame();
-        g.fillRect(player.pX - usernameWidth / 2 + sprite.getWidth() / 2 - 4, player.pY - 25, usernameWidth + 6, 22);
-        g.setColor(new Color(1f, 1f, 1f, 1f));
-        g.drawString(username.replace("_", " "), player.pX - usernameWidth / 2 + sprite.getWidth() / 2, player.pY - 25);
 
         //-----
     }

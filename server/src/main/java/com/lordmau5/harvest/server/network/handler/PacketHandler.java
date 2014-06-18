@@ -1,7 +1,9 @@
 package com.lordmau5.harvest.server.network.handler;
 
+import com.lordmau5.harvest.server.network.ClientConnection;
 import com.lordmau5.harvest.server.network.NetworkServer;
 import com.lordmau5.harvest.shared.network.packet.Packet;
+import com.lordmau5.harvest.shared.network.packet.player.PacketPlayerMovement;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -14,6 +16,11 @@ import io.netty.channel.SimpleChannelInboundHandler;
 public class PacketHandler extends SimpleChannelInboundHandler<Packet> {
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Packet msg) throws Exception {
+        if(msg instanceof PacketPlayerMovement) {
+            for(ClientConnection con : NetworkServer.connections)
+                con.channel().writeAndFlush(msg);
+            return;
+        }
         msg.process(ctx.channel().attr(NetworkServer.clientConnection).get());
     }
 

@@ -10,7 +10,9 @@ import com.lordmau5.harvest.shared.player.Player;
 import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.geom.Shape;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -23,6 +25,8 @@ public class World {
     public int farmHeight = 32;
     private Map<Tile, Entity> objects = new HashMap<>();
     private Map<Tile, Farmland> farmLand = new HashMap<>();
+
+    private List<String> players = new ArrayList<>();
 
     public World() {
         for(int x=0; x<farmWidth; x++) {
@@ -39,6 +43,20 @@ public class World {
 
         addBigStone(4, 4);
         addBigStone(16, 16);
+    }
+
+    public List<String> getPlayers() {
+        return players;
+    }
+
+    public void addPlayer(String username) {
+        if(!players.contains(username))
+            players.add(username);
+    }
+
+    public void removePlayer(String username) {
+        if(players.contains(username))
+            players.remove(username);
     }
 
     public Map<Tile, Farmland> getFarmland() {

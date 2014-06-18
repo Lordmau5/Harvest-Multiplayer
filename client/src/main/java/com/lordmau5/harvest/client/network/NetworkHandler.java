@@ -45,7 +45,7 @@ public class NetworkHandler {
     public static void onHandshakeComplete() {
         new Thread(){
             @Override
-            public synchronized void start() {
+            public synchronized void run() {
                 Client.initGLStuff();
             }
         }.start();

@@ -13,6 +13,7 @@ import com.lordmau5.harvest.shared.objects.IPickupable;
 import com.lordmau5.harvest.shared.objects.PlayerBoundaries;
 import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.Animation;
+import org.newdawn.slick.SpriteSheet;
 import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.geom.Shape;
 
@@ -46,6 +47,8 @@ public class Player {
 
     public Player(String username) {
         this.username = username;
+
+        playerAnim = new Animation(new SpriteSheet(playerAnims.get("stand").getImage(pFacing.ordinal()), 32, 32), 1000);
 
         boundingBox = new Shape[4];
         boundingBox[PlayerBoundaries.TOP_LEFT.ordinal()] = new Rectangle(pX + 11, pY + 16, 6, 6);
@@ -114,6 +117,7 @@ public class Player {
 
             pFacing = PlayerFacing.RIGHT;
         }
+        setPlayerTileBasedOnPosition();
         return walkBlocked;
     }
 
@@ -208,7 +212,6 @@ public class Player {
         int x = (int) Math.ceil(pX / 16);
         int y = (int) Math.ceil((pY + 10) / 16);
         playerTile.updatePos(x, y);
-        updatePos(pX, pY);
     }
 
     private boolean isCarrying() {
@@ -218,6 +221,8 @@ public class Player {
     public void updatePos(float x, float y) {
         this.pX = x;
         this.pY = y;
+
+        setPlayerTileBasedOnPosition();
 
         updateFacingTile();
 
