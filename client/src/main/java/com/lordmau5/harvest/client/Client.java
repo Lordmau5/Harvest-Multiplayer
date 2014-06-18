@@ -1,5 +1,6 @@
 package com.lordmau5.harvest.client;
 
+import com.lordmau5.harvest.client.network.NetworkHandler;
 import com.lordmau5.harvest.shared.Tile;
 import com.lordmau5.harvest.shared.World;
 import com.lordmau5.harvest.shared.farmable.crops.CropRegistry;
@@ -18,10 +19,7 @@ import com.lordmau5.harvest.shared.util.ImageLoader;
 import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Author: Lordmau5
@@ -51,7 +49,25 @@ public class Client extends BasicGame {
     Image crop, cropWilted;
     Map<String, Image> farmableImages = new HashMap<>();
 
+    Player player;
+    static String playerName;
+
     public static void main(String args[]) {
+
+        //-- Connection --
+
+        playerName = "Test-" + (new Random().nextInt(89999) + 10000);
+
+        String host = "localhost";
+        int port = 8075;
+
+        NetworkHandler.connect(host, port);
+
+        //----------------------------------------
+
+    }
+
+    public static void initGLStuff() {
         AppGameContainer game;
         try {
             game = new AppGameContainer(new Client());
@@ -63,7 +79,6 @@ public class Client extends BasicGame {
         } catch (SlickException e) {
             e.printStackTrace();
         }
-
     }
 
     Entity[] entities = new Entity[] {new Grass(), new BigStone()};
@@ -71,14 +86,12 @@ public class Client extends BasicGame {
     List<Player> otherPlayers = new ArrayList<>();
     //Map<Tile, ICrop> crops = new HashMap<>();
 
-    Player player;
-
-    public static Client instance;
+    public static String getPlayerName() {
+        return playerName;
+    }
 
     @Override
     public void init(GameContainer container) throws SlickException {
-        instance = this;
-
         for(String fland : farmLandNames) {
             farmLandImages.put(fland, ImageLoader.loadImage("textures/farmland/" + fland + ".png"));
         }
@@ -91,7 +104,7 @@ public class Client extends BasicGame {
             farmableImages.put(seedName, ImageLoader.loadImage("textures/farmables/" + seedName + ".png"));
         }
 
-        player = new Player("Lordmau5");
+        player = new Player(playerName);
         player.setWorld(new World());
 
         //-------------------------------------------------------
