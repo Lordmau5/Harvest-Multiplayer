@@ -76,7 +76,8 @@ public class Client extends BasicGame {
             game = new AppGameContainer(new Client());
             game.setDisplayMode(width, height, false);
             game.setShowFPS(false);
-            game.setUpdateOnlyWhenVisible(false);
+            game.setUpdateOnlyWhenVisible(true);
+            game.setAlwaysRender(true);
             game.start();
 
         } catch (SlickException e) {
@@ -209,14 +210,14 @@ public class Client extends BasicGame {
 
         if(!walkingSomewhere) {
             player.playerAnim = player.holding != null ? new Animation(new Image[]{Player.playerAnims.get("carryStill").getImage(player.pFacing.ordinal())}, 1000) : new Animation(new Image[]{Player.playerAnims.get("stand").getImage(player.pFacing.ordinal())}, 1000);
-            NetworkHandler.sendPacket(new PacketPlayerMovement(player, false));
+            NetworkHandler.sendPacket(new PacketPlayerMovement(player, false, true));
         }
 
         if(walkBlocked)
             player.playerTile.updatePos(oldX, oldY);
         else {
             player.updatePos(player.pX, player.pY);
-            NetworkHandler.sendPacket(new PacketPlayerMovement(player, running));
+            NetworkHandler.sendPacket(new PacketPlayerMovement(player, running, false));
         }
     }
 
@@ -346,4 +347,6 @@ public class Client extends BasicGame {
 
         //-----
     }
+
+
 }

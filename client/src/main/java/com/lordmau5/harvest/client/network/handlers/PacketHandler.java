@@ -10,6 +10,8 @@ import com.lordmau5.harvest.shared.player.Player;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import org.newdawn.slick.Animation;
+import org.newdawn.slick.Image;
 
 /**
  * @author: Lordmau5
@@ -38,9 +40,13 @@ public class PacketHandler extends SimpleChannelInboundHandler<Packet> {
             if(player == null || player == Client.instance.getLocalPlayer())
                 return;
 
-            player.walk(player.pFacing, 1, move.isRunning);
+            player.pFacing = move.direction;
+            player.updatePos(move.x, move.y);
 
-            //player.playerAnim = player.holding != null ? new Animation(new Image[]{Player.playerAnims.get("carryStill").getImage(player.pFacing.ordinal())}, 1000) : new Animation(new Image[]{Player.playerAnims.get("stand").getImage(player.pFacing.ordinal())}, 1000);
+            if(!move.isStill)
+                player.walk(player.pFacing, 1, move.isRunning);
+            else
+                player.playerAnim = player.holding != null ? new Animation(new Image[]{Player.playerAnims.get("carryStill").getImage(player.pFacing.ordinal())}, 1000) : new Animation(new Image[]{Player.playerAnims.get("stand").getImage(player.pFacing.ordinal())}, 1000);
             return;
         }
         msg.process(NetworkHandler.connection);

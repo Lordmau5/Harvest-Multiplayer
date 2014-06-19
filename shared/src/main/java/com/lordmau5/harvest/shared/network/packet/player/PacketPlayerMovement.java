@@ -18,18 +18,20 @@ public class PacketPlayerMovement extends Packet {
     public boolean isRunning;
     public float x;
     public float y;
+    public boolean isStill;
 
     public PacketPlayerMovement() {
 
     }
 
-    public PacketPlayerMovement(Player player, boolean isRunning) {
+    public PacketPlayerMovement(Player player, boolean isRunning, boolean isStill) {
         this.username = player.getUsername();
 
         this.direction = player.pFacing;
         this.isRunning = isRunning;
         this.x = player.pX;
         this.y = player.pY;
+        this.isStill = isStill;
     }
 
     @Override
@@ -50,6 +52,7 @@ public class PacketPlayerMovement extends Packet {
         this.isRunning = buffer.readBoolean();
         this.x = buffer.readFloat();
         this.y = buffer.readFloat();
+        this.isStill = buffer.readBoolean();
     }
 
     @Override
