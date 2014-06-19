@@ -9,6 +9,7 @@ import io.netty.buffer.ByteBuf;
  * @time: 18.06.2014 - 18:27
  */
 public class PacketPlayerAction extends Packet {
+
     @Override
     public void encode(ByteBuf buffer) {
 
@@ -21,6 +22,7 @@ public class PacketPlayerAction extends Packet {
 
     @Override
     public void process(ConnectionContext ctx) {
-
+        // Needed?
     }
+
 }

@@ -6,7 +6,6 @@ import com.lordmau5.harvest.shared.network.packet.Packet;
 import com.lordmau5.harvest.shared.network.packet.player.PacketPlayerMovement;
 import com.lordmau5.harvest.shared.network.packet.playercon.PacketPlayerJoin;
 import com.lordmau5.harvest.shared.network.packet.playercon.PacketPlayerLeave;
-import com.lordmau5.harvest.shared.network.packet.playercon.PacketSendPlayers;
 import com.lordmau5.harvest.shared.player.Player;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -29,9 +28,6 @@ public class PacketHandler extends SimpleChannelInboundHandler<Packet> {
         else if(msg instanceof PacketPlayerLeave) {
             Client.instance.playerLeave(((PacketPlayerLeave) msg).username);
             return;
-        }
-        else if(msg instanceof PacketSendPlayers) {
-            Client.instance.updatePlayersFromServer(((PacketSendPlayers) msg).usernames);
         }
         else if(msg instanceof PacketPlayerMovement) { // Let the player move *Kreygasm*
             PacketPlayerMovement move = (PacketPlayerMovement) msg;
