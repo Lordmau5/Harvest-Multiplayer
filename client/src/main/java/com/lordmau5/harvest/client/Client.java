@@ -11,6 +11,7 @@ import com.lordmau5.harvest.shared.farmable.seeds.TomatoSeeds;
 import com.lordmau5.harvest.shared.farmable.seeds.TurnipSeeds;
 import com.lordmau5.harvest.shared.floor.Farmland;
 import com.lordmau5.harvest.shared.network.packet.player.PacketPlayerMovement;
+import com.lordmau5.harvest.shared.network.packet.playercon.PacketRequestPlayers;
 import com.lordmau5.harvest.shared.objects.Entity;
 import com.lordmau5.harvest.shared.objects.doubleTile.BigStone;
 import com.lordmau5.harvest.shared.objects.singleTile.Grass;
@@ -91,7 +92,21 @@ public class Client extends BasicGame {
     Map<String, Player> players = new HashMap<>();
     List<Player> aPlayers = new ArrayList<>();
 
+    public void updatePlayersFromServer(List<String> usernames) {
+        players.clear();
+        aPlayers.clear();
+
+        aPlayers.add(player);
+        for(String username : usernames) {
+            Player player = new Player(username);
+            player.setWorld(player.getWorld());
+            players.put(username, player);
+            aPlayers.add(player);
+        }
+    }
+
     public void playerJoin(String username) {
+        System.out.println("New player - " + username);
         if(!players.containsKey(username)) {
             Player player = new Player(username);
             player.setWorld(this.player.getWorld());
@@ -177,6 +192,10 @@ public class Client extends BasicGame {
         players.put(playerName, player);
         aPlayers.add(player);
         player.setWorld(new World());
+
+        //-------------------------------
+
+        NetworkHandler.sendPacket(new PacketRequestPlayers(getPlayerName()));
     }
 
     void movement(GameContainer container, int delta) {
@@ -211,14 +230,17 @@ public class Client extends BasicGame {
 
         if(!walkingSomewhere) {
             player.playerAnim = player.holding != null ? new Animation(new Image[]{Player.playerAnims.get("carryStill").getImage(player.pFacing.ordinal())}, 1000) : new Animation(new Image[]{Player.playerAnims.get("stand").getImage(player.pFacing.ordinal())}, 1000);
-            NetworkHandler.sendPacket(new PacketPlayerMovement(player, false, true));
+            NetworkHandler.sendPacket(new PacketPlayerMovement(player, false, true, false));
+            return;
         }
 
-        if(walkBlocked)
+        if(walkBlocked) {
             player.playerTile.updatePos(oldX, oldY);
+            NetworkHandler.sendPacket(new PacketPlayerMovement(player, running, false, true));
+        }
         else {
             player.updatePos(player.pX, player.pY);
-            NetworkHandler.sendPacket(new PacketPlayerMovement(player, running, false));
+            NetworkHandler.sendPacket(new PacketPlayerMovement(player, running, false, false));
         }
     }
 

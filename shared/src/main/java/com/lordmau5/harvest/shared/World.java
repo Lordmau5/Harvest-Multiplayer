@@ -75,7 +75,7 @@ public class World {
             ret = false;
 
         if(!ret) {
-            player.updatePos(player.pX + inter[0] * 0.1f + interLand[0] * 0.1f, player.pY + inter[1] * 0.1f + interLand[1] * 0.1f);
+            player.updatePos(player.pX + inter[0] + interLand[0], player.pY + inter[1] + interLand[1]);
             return false;
         }
         return true;

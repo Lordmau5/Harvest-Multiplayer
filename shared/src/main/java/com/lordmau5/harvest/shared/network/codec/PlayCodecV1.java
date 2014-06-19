@@ -4,6 +4,7 @@ import com.lordmau5.harvest.shared.network.packet.handshake.PacketCloseConnectio
 import com.lordmau5.harvest.shared.network.packet.player.PacketPlayerMovement;
 import com.lordmau5.harvest.shared.network.packet.playercon.PacketPlayerJoin;
 import com.lordmau5.harvest.shared.network.packet.playercon.PacketPlayerLeave;
+import com.lordmau5.harvest.shared.network.packet.playercon.PacketRequestPlayers;
 
 /**
  * @author: Lordmau5
@@ -16,7 +17,8 @@ public class PlayCodecV1 extends PacketCodec {
 
         this.registerPacket(2, PacketPlayerJoin.class);
         this.registerPacket(3, PacketPlayerLeave.class);
+        this.registerPacket(4, PacketRequestPlayers.class);
 
-        this.registerPacket(4, PacketPlayerMovement.class);
+        this.registerPacket(5, PacketPlayerMovement.class);
     }
 }
