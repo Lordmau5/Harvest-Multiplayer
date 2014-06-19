@@ -77,7 +77,7 @@ public class Client extends BasicGame {
             game = new AppGameContainer(new Client());
             game.setDisplayMode(width, height, false);
             game.setShowFPS(false);
-            game.setTargetFrameRate(60);
+            game.setVSync(true);
             game.setUpdateOnlyWhenVisible(true);
             game.setAlwaysRender(true);
             game.start();
@@ -91,19 +91,6 @@ public class Client extends BasicGame {
     Map<String, Image> objectTextures = new HashMap<>();
     Map<String, Player> players = new HashMap<>();
     List<Player> aPlayers = new ArrayList<>();
-
-    public void updatePlayersFromServer(List<String> usernames) {
-        players.clear();
-        aPlayers.clear();
-
-        aPlayers.add(player);
-        for(String username : usernames) {
-            Player player = new Player(username);
-            player.setWorld(player.getWorld());
-            players.put(username, player);
-            aPlayers.add(player);
-        }
-    }
 
     public void playerJoin(String username) {
         System.out.println("New player - " + username);
