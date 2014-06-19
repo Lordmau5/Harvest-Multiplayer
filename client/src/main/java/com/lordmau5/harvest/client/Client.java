@@ -76,6 +76,7 @@ public class Client extends BasicGame {
             game = new AppGameContainer(new Client());
             game.setDisplayMode(width, height, false);
             game.setShowFPS(false);
+            game.setTargetFrameRate(60);
             game.setUpdateOnlyWhenVisible(true);
             game.setAlwaysRender(true);
             game.start();
