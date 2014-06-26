@@ -10,9 +10,7 @@ import com.lordmau5.harvest.shared.player.Player;
 import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.geom.Shape;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -21,46 +19,27 @@ import java.util.Map;
  */
 public class World {
 
+    public static Map<String, Entity> entities = new HashMap<>();
+
     public int farmWidth = 32;
     public int farmHeight = 32;
     private Map<Tile, Entity> objects = new HashMap<>();
     private Map<Tile, Farmland> farmLand = new HashMap<>();
 
-    private List<String> players = new ArrayList<>();
-
     public World() {
-        for(int x=0; x<farmWidth; x++) {
-            for(int y=0; y<farmHeight; y++) {
-                farmLand.put(new Tile(x, y), new Farmland(x, y));
-            }
-        }
 
-        addGrass(8, 8);
-        addGrass(8, 9);
-        addGrass(16, 8);
-        addGrass(18, 8);
-        addGrass(14, 6);
-
-        addBigStone(4, 4);
-        addBigStone(16, 16);
     }
 
-    public List<String> getPlayers() {
-        return players;
-    }
-
-    public void addPlayer(String username) {
-        if(!players.contains(username))
-            players.add(username);
-    }
-
-    public void removePlayer(String username) {
-        if(players.contains(username))
-            players.remove(username);
+    public void setFarmLand(Map<Tile, Farmland> farmLand) {
+        this.farmLand = farmLand;
     }
 
     public Map<Tile, Farmland> getFarmland() {
         return farmLand;
+    }
+
+    public void setObjects(Map<Tile, Entity> objects) {
+        this.objects = objects;
     }
 
     public Map<Tile, Entity> getObjects() {
@@ -110,22 +89,24 @@ public class World {
     }
 
     public Entity getObjectAtPosition(int tX, int tY) {
-        for(Map.Entry<Tile, Entity> entry : objects.entrySet()) {
-            Tile tile = entry.getKey();
-            if(tX == tile.getX() && tY == tile.getY())
-                return entry.getValue();
-        }
-        return null;
+        Tile tile = new Tile(tX, tY);
+        if(!objects.containsKey(tile))
+            return null;
+        return objects.get(tile);
     }
 
-    public void addGrass(int tX, int tY) {
-        objects.put(new Tile(tX, tY), new Grass(tX, tY));
-        fixFarmlands(new Rectangle(tX * 16 + 4, tY * 16 + 4, 8, 8));
+    public Entity getObjectAtPosition(Tile tile) {
+        return objects.containsKey(tile) ? objects.get(tile) : null;
     }
 
-    public void addBigStone(int tX, int tY) {
-        objects.put(new Tile(tX, tY), new BigStone(tX, tY));
-        fixFarmlands(new Rectangle(tX * 16 + 4, tY * 16 + 4, 24, 24));
+    public void addEntity(String name, int tX, int tY) {
+        if(!entities.containsKey(name))
+            return;
+
+        Entity ent = entities.get(name).newInstance();
+        ent.updatePos(tX, tY);
+        objects.put(new Tile(tX, tY), ent);
+        fixFarmlands(new Rectangle(tX * 16 + 4, tY * 16 + 4, ent.spriteSize - 8, ent.spriteSize - 8));
     }
 
     public boolean removeObject(Tile facingTile) {
@@ -164,6 +145,11 @@ public class World {
             Farmland land = farmLand.get(tile);
             land.setCrop(null);
         }
+    }
+
+    static {
+        entities.put("grass", new Grass());
+        entities.put("bigStone", new BigStone());
     }
 
 }

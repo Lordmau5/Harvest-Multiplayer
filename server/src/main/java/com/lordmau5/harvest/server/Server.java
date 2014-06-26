@@ -4,7 +4,9 @@ package com.lordmau5.harvest.server;
 
 import com.lordmau5.harvest.server.network.ClientConnection;
 import com.lordmau5.harvest.server.network.NetworkServer;
+import com.lordmau5.harvest.shared.Tile;
 import com.lordmau5.harvest.shared.World;
+import com.lordmau5.harvest.shared.floor.Farmland;
 
 /**
  * Author: Lordmau5
@@ -19,6 +21,21 @@ public class Server {
         Runtime.getRuntime().addShutdownHook(new Shutdown());
 
         world = new World();
+
+        for(int x=0; x<world.farmWidth; x++) {
+            for(int y=0; y<world.farmHeight; y++) {
+                world.getFarmland().put(new Tile(x, y), new Farmland(x, y));
+            }
+        }
+
+        world.addEntity("grass", 8, 8);
+        world.addEntity("grass", 8, 9);
+        world.addEntity("grass", 16, 8);
+        world.addEntity("grass", 18, 8);
+        world.addEntity("grass", 14, 6);
+
+        world.addEntity("bigStone", 4, 4);
+        world.addEntity("bigStone", 16, 16);
 
         NetworkServer.start("localhost", 8075);
     }

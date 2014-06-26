@@ -31,11 +31,11 @@ public class CropRegistry {
         return null;
     }
 
-    public static ICrop getCrop(ISeeds seeds) {
-        if(!cropMap.containsKey(seeds.getSeedName()))
+    public static ICrop getCrop(String seeds) {
+        if(!cropMap.containsKey(seeds))
             return null;
 
-        return cropMap.get(seeds.getSeedName());
+        return cropMap.get(seeds);
     }
 
     public static Map<String, ICrop> getCropMap() {

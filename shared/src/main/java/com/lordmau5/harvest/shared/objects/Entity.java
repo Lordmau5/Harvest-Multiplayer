@@ -10,14 +10,14 @@ import org.newdawn.slick.geom.Shape;
  */
 public class Entity {
 
-    public final String texture;
+    public final String name;
     private Shape boundingBox;
     public Tile tile;
     public int spriteSize;
 
-    public Entity(String texture, int spriteSize, int xTile, int yTile) {
+    public Entity(String name, int spriteSize, int xTile, int yTile) {
         this.spriteSize = spriteSize;
-        this.texture = texture;
+        this.name = name;
         this.boundingBox = new Rectangle(xTile * 16 + 1, yTile * 16, spriteSize, spriteSize);
         this.tile = new Tile(xTile, yTile);
     }
@@ -31,7 +31,11 @@ public class Entity {
         return this.boundingBox;
     }
 
-    public Entity clone() {
+    public void setBoundingBox(Shape boundingBox) {
+        this.boundingBox = boundingBox;
+    }
+
+    public Entity newInstance() {
         try {
             return this.getClass().newInstance();
         } catch (InstantiationException e) {

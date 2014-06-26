@@ -11,8 +11,8 @@ import org.newdawn.slick.geom.Rectangle;
  */
 public class Farmland {
 
-    boolean tilled = false;
-    boolean watered = false;
+    private boolean tilled = false;
+    private boolean watered = false;
 
     public Rectangle boundingBox;
 
@@ -22,6 +22,10 @@ public class Farmland {
     public Farmland(int tX, int tY) {
         this.tile = new Tile(tX, tY);
         this.boundingBox = new Rectangle(tX * 16 + 1, tY * 16, 16, 16);
+
+        this.crop = null;
+        this.tilled = false;
+        this.watered = false;
     }
 
     public void setTilled(boolean tilled) {

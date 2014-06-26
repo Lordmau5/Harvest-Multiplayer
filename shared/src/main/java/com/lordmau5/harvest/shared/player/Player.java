@@ -9,7 +9,6 @@ import com.lordmau5.harvest.shared.farmable.seeds.ISeeds;
 import com.lordmau5.harvest.shared.floor.Farmland;
 import com.lordmau5.harvest.shared.items.IUseable;
 import com.lordmau5.harvest.shared.objects.Entity;
-import com.lordmau5.harvest.shared.objects.IPickupable;
 import com.lordmau5.harvest.shared.objects.PlayerBoundaries;
 import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.Animation;
@@ -123,23 +122,6 @@ public class Player {
 
     public void doAction(int keycode) {
         switch(keycode) {
-            case Keyboard.KEY_C: { // Pickup / place down items (currently only Grass)
-                if(holding != null) {
-                    if(world.isEntityInRectangle(new Rectangle(playerFacingTile.getX() * 16 + 4, playerFacingTile.getY() * 16 + 4, 7, 7)))
-                        return;
-
-                    world.addGrass(playerFacingTile.getX(), playerFacingTile.getY());
-                    holding = null;
-                    return;
-                }
-
-                Entity ent = world.getObjectAtPosition(playerFacingTile.getX(), playerFacingTile.getY());
-                if(ent == null || !(ent instanceof IPickupable))
-                    return;
-
-                world.removeObject(playerFacingTile);
-                holding = ent;
-            }
             case Keyboard.KEY_B: {
                 Entity ent = getWorld().getObjectAtPosition(playerFacingTile.getX(), playerFacingTile.getY());
                 if(ent != null)
@@ -173,7 +155,7 @@ public class Player {
                     return;
 
                 Tile cropTile = new Tile(playerFacingTile.getX(), playerFacingTile.getY());
-                getWorld().addCrop(cropTile, CropRegistry.buildCrop(CropRegistry.getCrop((ISeeds) useable)));
+                getWorld().addCrop(cropTile, CropRegistry.buildCrop(CropRegistry.getCrop(((ISeeds) useable).getSeedName())));
             }
             case Keyboard.KEY_I: {
                 Entity ent = getWorld().getObjectAtPosition(playerFacingTile.getX(), playerFacingTile.getY());
@@ -202,7 +184,7 @@ public class Player {
                 if(!remove.isEmpty())
                     for(Tile cropTile : remove) {
                         getWorld().removeCrops(cropTile);
-                        getWorld().addGrass(cropTile.getX(), cropTile.getY());
+                        //getWorld().addGrass(cropTile.getX(), cropTile.getY());
                     }
             }
         }

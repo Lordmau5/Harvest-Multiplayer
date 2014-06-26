@@ -1,7 +1,10 @@
 package com.lordmau5.harvest.server.network;
 
+import com.lordmau5.harvest.server.Server;
+import com.lordmau5.harvest.shared.network.packet.Packet;
 import com.lordmau5.harvest.shared.network.packet.playercon.PacketPlayerJoin;
 import com.lordmau5.harvest.shared.network.packet.playercon.PacketPlayerLeave;
+import com.lordmau5.harvest.shared.network.packet.world.PacketInitWorld;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
@@ -38,12 +41,19 @@ public class NetworkServer {
         }).syncUninterruptibly(); //TODO: remove this sync!
     }
 
+    public static void sendPacketToAll(Packet packet) {
+        for(ClientConnection con : connections)
+            con.channel().writeAndFlush(packet);
+    }
+
     public static void onConnectionOpened(ClientConnection connection) {
         for(ClientConnection con : connections) {
             con.channel().writeAndFlush(new PacketPlayerJoin(connection.username()));
         }
         connections.add(connection);
         System.out.println("Player " + connection.username() + "(" + connection.channel().remoteAddress().toString() + ") logged in!");
+
+        connection.channel().writeAndFlush(new PacketInitWorld(Server.world.getObjects(), Server.world.getFarmland()));
     }
 
     public static void onConnectionClosed(ClientConnection connection) {

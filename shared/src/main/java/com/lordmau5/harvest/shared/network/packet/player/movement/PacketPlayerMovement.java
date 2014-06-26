@@ -1,4 +1,4 @@
-package com.lordmau5.harvest.shared.network.packet.player;
+package com.lordmau5.harvest.shared.network.packet.player.movement;
 
 import com.lordmau5.harvest.shared.network.ConnectionContext;
 import com.lordmau5.harvest.shared.network.PacketUtils;

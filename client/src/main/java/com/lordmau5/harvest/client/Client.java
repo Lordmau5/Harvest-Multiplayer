@@ -10,11 +10,10 @@ import com.lordmau5.harvest.shared.farmable.seeds.ISeeds;
 import com.lordmau5.harvest.shared.farmable.seeds.TomatoSeeds;
 import com.lordmau5.harvest.shared.farmable.seeds.TurnipSeeds;
 import com.lordmau5.harvest.shared.floor.Farmland;
-import com.lordmau5.harvest.shared.network.packet.player.PacketPlayerMovement;
+import com.lordmau5.harvest.shared.network.packet.player.action.PacketPlayerPickupPlace;
+import com.lordmau5.harvest.shared.network.packet.player.movement.PacketPlayerMovement;
 import com.lordmau5.harvest.shared.network.packet.playercon.PacketRequestPlayers;
 import com.lordmau5.harvest.shared.objects.Entity;
-import com.lordmau5.harvest.shared.objects.doubleTile.BigStone;
-import com.lordmau5.harvest.shared.objects.singleTile.Grass;
 import com.lordmau5.harvest.shared.player.Player;
 import com.lordmau5.harvest.shared.player.PlayerFacing;
 import com.lordmau5.harvest.shared.util.ImageLoader;
@@ -53,7 +52,8 @@ public class Client extends BasicGame {
     Image crop, cropWilted;
     Map<String, Image> farmableImages = new HashMap<>();
 
-    Player player;
+    static World world;
+    static Player player;
     static String playerName;
 
     public static void main(String args[]) {
@@ -87,7 +87,6 @@ public class Client extends BasicGame {
         }
     }
 
-    Entity[] entities = new Entity[] {new Grass(), new BigStone()};
     Map<String, Image> objectTextures = new HashMap<>();
     Map<String, Player> players = new HashMap<>();
     List<Player> aPlayers = new ArrayList<>();
@@ -95,10 +94,10 @@ public class Client extends BasicGame {
     public void playerJoin(String username) {
         System.out.println("New player - " + username);
         if(!players.containsKey(username)) {
-            Player player = new Player(username);
-            player.setWorld(this.player.getWorld());
-            players.put(username, player);
-            aPlayers.add(player);
+            Player newPlayer = new Player(username);
+            newPlayer.setWorld(player.getWorld());
+            players.put(username, newPlayer);
+            aPlayers.add(newPlayer);
         }
     }
 
@@ -115,12 +114,22 @@ public class Client extends BasicGame {
     }
 
     public Player getPlayer(String username) {
+        if(username.equals(getPlayerName()))
+            return player;
+
         if(!players.containsKey(username))
             return null;
+
         return players.get(username);
     }
 
-    public Player getLocalPlayer() {
+    public static void setPlayerWorld(World newWorld) {
+        world = newWorld;
+    }
+
+    public static World getPlayerWorld() { return world; }
+
+    public static Player getLocalPlayer() {
         return player;
     }
 
@@ -166,19 +175,13 @@ public class Client extends BasicGame {
         objectTextures.put("grass", ImageLoader.loadImage("textures/grassTest.png"));
         objectTextures.put("bigStone", ImageLoader.loadImage("textures/bigStoneTest.png"));
 
-        /*addGrass(8, 8);
-        addGrass(8, 9);
-        addGrass(16, 8);
-        addGrass(18, 8);
-        addGrass(14, 6);
-
-        addBigStone(4, 4);
-        addBigStone(16, 16);*/
+        if(world == null)
+            world = new World();
 
         player = new Player(playerName);
         players.put(playerName, player);
         aPlayers.add(player);
-        player.setWorld(new World());
+        player.setWorld(world);
 
         //-------------------------------
 
@@ -234,6 +237,7 @@ public class Client extends BasicGame {
     void otherActions(GameContainer container) {
         Input input = container.getInput();
 
+        Tile facingTile = getLocalPlayer().playerFacingTile;
         /*if(input.isKeyPressed(Keyboard.KEY_R)) { // Random Objects
             objects.clear();
 
@@ -260,7 +264,7 @@ public class Client extends BasicGame {
             }
         }*/
         if(input.isKeyPressed(Keyboard.KEY_C)) { // Pickup items | Temporary
-            player.doAction(Keyboard.KEY_C);
+            NetworkHandler.sendPacket(new PacketPlayerPickupPlace(getPlayerName(), facingTile, player.holding));
         }
         if(input.isKeyPressed(Keyboard.KEY_B)) { // Till / Un-Till Farmland
             player.doAction(Keyboard.KEY_B);
@@ -309,7 +313,7 @@ public class Client extends BasicGame {
     public void render(GameContainer container, Graphics g) throws SlickException {
         g.translate(width / 2 - player.pX, height / 2 - player.pY);
 
-        for(Map.Entry<Tile, Farmland> pos : player.getWorld().getFarmland().entrySet()) {
+        for(Map.Entry<Tile, Farmland> pos : world.getFarmland().entrySet()) {
             Tile tile = pos.getKey();
             Farmland land = pos.getValue();
             farmLandImages.get(land.isWatered() ? "watered" : (land.isTilled() ? "tilled" : "normal")).draw(tile.getX() * 16, tile.getY() * 16);
@@ -328,9 +332,9 @@ public class Client extends BasicGame {
             }
         }
 
-        for(Map.Entry<Tile, Entity> pos : player.getWorld().getObjects().entrySet()) {
+        for(Map.Entry<Tile, Entity> pos : world.getObjects().entrySet()) {
             Tile tile = pos.getKey();
-            objectTextures.get(pos.getValue().texture).draw(tile.getX() * 16, tile.getY() * 16);
+            objectTextures.get(pos.getValue().name).draw(tile.getX() * 16, tile.getY() * 16);
         }
         g.setColor(new Color(0f, 0f, 0f, 0.75f));
 
@@ -342,7 +346,7 @@ public class Client extends BasicGame {
             player.playerAnim.draw(player.pX, player.pY);
 
             if(player.holding != null) {
-                objectTextures.get(player.holding.texture).draw(player.pX + player.holding.spriteSize / 2, player.pY - player.holding.spriteSize / 2);
+                objectTextures.get(player.holding.name).draw(player.pX + player.holding.spriteSize / 2, player.pY - player.holding.spriteSize / 2);
             }
 
             g.setColor(new Color(0f, 0f, 0f, 0.5f));
