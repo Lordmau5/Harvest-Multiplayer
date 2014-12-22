@@ -1,28 +1,15 @@
-buildscript {
-    repositories {
-        maven {
-            url 'http://dl.bintray.com/cjstehno/public/'
-        }
-    }
-
-    dependencies {
-        classpath 'gradle-natives:gradle-natives:0.1'
-    }
-}
-
-apply plugin: 'natives'
-
 dependencies {
-    packed project(":shared")
-    packed 'org.lwjgl.lwjgl:lwjgl:2.9.1'
-    packed 'org.slick2d:slick2d-core:1.0.1'
-}
-
-natives {
-    jars = ['lwjgl-platform-2.9.1-natives-windows']
-    platforms = 'windows'
+    compile files('lib/lwjgl/lwjgl.jar')
+    compile files('lib/lwjgl/disruptor.jar')
+    compile 'io.netty:netty-all:4.1.0.Beta3'
+    compile project(':shared')
 }
 
 jar.manifest {
-    attributes "Main-Class": "com.lordmau5.harvest.client.Client_GL"
+    attributes "Main-Class": "com.lordmau5.harvest.client.Client"
+}
+
+task copyNatives(type: Copy) {
+    from 'lib/lwjgl/natives/'
+    into "$buildDir/libs/natives/"
 }

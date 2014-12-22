@@ -19,11 +19,6 @@ subprojects {
         mavenCentral()
     }
 
-    configurations {
-        packed
-        compile.extendsFrom packed
-    }
-
     jar {
         baseName = 'Harvest-' + baseName
         destinationDir = new File(rootProject.getBuildDir(), 'libs')
@@ -35,15 +30,6 @@ subprojects {
             attributes 'Implementation-Title': 'com.lordmau5.harvest'
             attributes 'Implementation-Version': rootProject.version
             attributes 'Implementation-Vendor': 'Lordmau5'
-        }
-
-        from {
-            configurations.packed.collect {
-                it.isDirectory() ? it : zipTree(it).matching {
-                    exclude "META-INF", "META-INF/**", "*META-INF*", "meta-inf"
-                    exclude "**.jar", "**/*.jar", "*.jar"
-                }
-            }
         }
     }
 }
