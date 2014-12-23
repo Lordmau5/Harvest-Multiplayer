@@ -1,6 +1,7 @@
 package com.lordmau5.harvest.shared.net.serialization;
 
 import com.lordmau5.harvest.shared.net.packet.PacketBase;
+import com.lordmau5.harvest.shared.serialization.SerializerBase;
 
 public class PacketSerializer extends SerializerBase<PacketBase> {
     @Override

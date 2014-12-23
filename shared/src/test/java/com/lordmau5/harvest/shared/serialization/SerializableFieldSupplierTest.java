@@ -1,4 +1,4 @@
-package com.lordmau5.harvest.shared.net;
+package com.lordmau5.harvest.shared.serialization;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -7,7 +7,7 @@ import org.junit.Test;
 import java.lang.reflect.Field;
 
 /**
- * Tests for {@link com.lordmau5.harvest.shared.net.SerializableFieldIterator}
+ * Tests for {@link com.lordmau5.harvest.shared.serialization.SerializableFieldIterator}
  */
 public class SerializableFieldSupplierTest {
 

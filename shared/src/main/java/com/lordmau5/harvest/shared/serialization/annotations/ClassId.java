@@ -1,4 +1,4 @@
-package com.lordmau5.harvest.shared.net.serialization.annotations;
+package com.lordmau5.harvest.shared.serialization.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -1,4 +1,4 @@
-package com.lordmau5.harvest.shared.net;
+package com.lordmau5.harvest.shared.serialization;
 
 import java.lang.reflect.Field;
 import java.util.Iterator;

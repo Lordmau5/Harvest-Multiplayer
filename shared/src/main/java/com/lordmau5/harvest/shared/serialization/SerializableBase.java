@@ -1,6 +1,6 @@
-package com.lordmau5.harvest.shared.net;
+package com.lordmau5.harvest.shared.serialization;
 
-import com.lordmau5.harvest.shared.net.serialization.annotations.ClassId;
+import com.lordmau5.harvest.shared.serialization.annotations.ClassId;
 
 import java.lang.reflect.Field;
 import java.util.Iterator;
