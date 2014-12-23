@@ -4,7 +4,7 @@ import com.lordmau5.harvest.shared.serialization.annotations.AnnotationHelper;
 
 import java.util.HashMap;
 
-public class PacketFactory {
+public class PacketFactory implements IPacketFactory {
     HashMap<Integer, Class<? extends PacketBase>> packetHashMap;
 
     public PacketFactory() {

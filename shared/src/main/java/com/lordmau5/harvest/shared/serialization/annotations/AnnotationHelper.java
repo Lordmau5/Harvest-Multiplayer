@@ -1,6 +1,7 @@
 package com.lordmau5.harvest.shared.serialization.annotations;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AccessibleObject;
 
 public abstract class AnnotationHelper {
     public static int getClassId(Class<?> clazz) {
@@ -8,5 +9,10 @@ public abstract class AnnotationHelper {
         if (annotation != null)
             return ((ClassId) annotation).id();
         return 0;
+    }
+
+    public static boolean hasAnnotation(AccessibleObject member, Class annotationClass) {
+        Annotation annotation = member.getAnnotation(annotationClass);
+        return annotation != null;
     }
 }

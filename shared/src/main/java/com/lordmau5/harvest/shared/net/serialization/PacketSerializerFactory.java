@@ -25,6 +25,10 @@ public class PacketSerializerFactory implements ISerializerFactory {
 
     @Override
     public ISerializer getSerializer(Class clazz) {
+        // TODO find a better solution
+        if (clazz.equals(int.class))
+            clazz = Integer.class;
+
         return serializerHashMap.getOrDefault(clazz, null);
     }
 

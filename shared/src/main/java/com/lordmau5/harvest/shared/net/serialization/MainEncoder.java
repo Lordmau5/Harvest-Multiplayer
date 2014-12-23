@@ -1,6 +1,7 @@
 package com.lordmau5.harvest.shared.net.serialization;
 
 import com.lordmau5.harvest.shared.net.packet.PacketBase;
+import com.lordmau5.harvest.shared.net.packet.PacketFactory;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
@@ -11,7 +12,7 @@ public class MainEncoder extends MessageToByteEncoder<PacketBase> {
     private final PacketSerializer packetSerializer;
 
     public MainEncoder() {
-        packetSerializer = new PacketSerializer();
+        packetSerializer = new PacketSerializer(new PacketFactory());
     }
 
     @Override

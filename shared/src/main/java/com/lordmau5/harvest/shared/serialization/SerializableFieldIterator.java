@@ -1,25 +1,33 @@
 package com.lordmau5.harvest.shared.serialization;
 
+import com.lordmau5.harvest.shared.serialization.annotations.AnnotationHelper;
+import com.lordmau5.harvest.shared.serialization.annotations.SerializableField;
+
 import java.lang.reflect.Field;
+import java.util.ArrayDeque;
 import java.util.Iterator;
+import java.util.Queue;
 
 public class SerializableFieldIterator implements Iterator<Field> {
-    private Field[] fields;
-    private int position;
+    private Queue<Field> fields;
 
     public SerializableFieldIterator init(Class<? extends SerializableBase> clazz) {
-        fields = clazz.getFields();
-        position = 0;
+        fields = new ArrayDeque<>();
+        for (Field f : clazz.getFields()) {
+            if (AnnotationHelper.hasAnnotation(f, SerializableField.class)) {
+                fields.add(f);
+            }
+        }
         return this;
     }
 
     @Override
     public boolean hasNext() {
-        return fields.length < position;
+        return !fields.isEmpty();
     }
 
     @Override
     public Field next() {
-        return fields[position++];
+        return fields.poll();
     }
 }
