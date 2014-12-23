@@ -1,9 +1,10 @@
 package com.lordmau5.harvest.server;
 
-/**
- * Created by BinaryTENSHi on 22.12.2014.
- */
+import com.lordmau5.harvest.server.net.HarvestServer;
+
 public class Server {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
+        HarvestServer server = new HarvestServer(1234);
+        server.run();
     }
 }

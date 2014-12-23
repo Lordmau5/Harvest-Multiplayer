@@ -1,9 +1,10 @@
 package com.lordmau5.harvest.client;
 
-/**
- * Created by BinaryTENSHi on 22.12.2014.
- */
+import com.lordmau5.harvest.client.net.HarvestClient;
+
 public class Client {
     public static void main(String[] args) {
+        HarvestClient client = new HarvestClient("localhost", 1234);
+        client.connect();
     }
 }

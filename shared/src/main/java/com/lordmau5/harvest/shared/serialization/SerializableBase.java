@@ -1,6 +1,6 @@
 package com.lordmau5.harvest.shared.serialization;
 
-import com.lordmau5.harvest.shared.serialization.annotations.ClassId;
+import com.lordmau5.harvest.shared.serialization.annotations.AnnotationHelper;
 
 import java.lang.reflect.Field;
 import java.util.Iterator;
@@ -13,7 +13,7 @@ public class SerializableBase {
     }
 
     public int getClassId() {
-        return getClass().getAnnotation(ClassId.class).id();
+        return AnnotationHelper.getClassId(getClass());
     }
 }
 
