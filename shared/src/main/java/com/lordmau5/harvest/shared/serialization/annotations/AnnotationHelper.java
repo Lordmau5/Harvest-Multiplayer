@@ -11,7 +11,7 @@ public abstract class AnnotationHelper {
         return 0;
     }
 
-    public static boolean hasAnnotation(AccessibleObject member, Class annotationClass) {
+    public static boolean hasAnnotation(AccessibleObject member, Class<? extends Annotation> annotationClass) {
         Annotation annotation = member.getAnnotation(annotationClass);
         return annotation != null;
     }
