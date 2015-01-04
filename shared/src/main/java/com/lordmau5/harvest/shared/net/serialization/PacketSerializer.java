@@ -18,7 +18,7 @@ public class PacketSerializer implements ISerializer<PacketBase> {
     public PacketSerializer(IPacketFactory packetFactory) {
         this.packetFactory = packetFactory;
         serializerFactory = new PacketSerializerFactory();
-        classIdSerializer = serializerFactory.getTypedSerializer(Integer.class);
+        classIdSerializer = serializerFactory.getTypedSerializer(int.class);
     }
 
     @Override
