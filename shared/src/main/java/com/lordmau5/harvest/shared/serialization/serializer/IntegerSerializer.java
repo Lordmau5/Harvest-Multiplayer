@@ -27,6 +27,6 @@ public class IntegerSerializer implements ISerializer<Integer> {
 
     @Override
     public Class getSerializeClass() {
-        return Integer.class;
+        return int.class;
     }
 }
